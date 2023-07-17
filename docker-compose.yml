@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  gnas:
+    image: tbma-gnas:latest
+    command: bash
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./src:/tbma-gnas/src
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
