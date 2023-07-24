@@ -1,5 +1,5 @@
 FROM python:3.11.4
-WORKDIR /tbma-gnas
+WORKDIR /tbma_gnas
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir torch torchvision torchaudio

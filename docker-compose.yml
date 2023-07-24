@@ -7,7 +7,7 @@ services:
     tty: true
     stdin_open: true
     volumes:
-      - ./src:/tbma-gnas/src
+      - ./tbma_gnas:/tbma_gnas
     deploy:
       resources:
         reservations:
