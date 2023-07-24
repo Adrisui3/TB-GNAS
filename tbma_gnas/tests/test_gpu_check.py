@@ -1,5 +1,5 @@
 import torch
-import pytest
+
 
 class TestTorchGPU:
     def test_is_cuda_enabled(self):
