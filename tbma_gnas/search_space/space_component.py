@@ -1,6 +1,7 @@
 import random
 from threading import Lock
-from .component_type import ComponentType
+
+from component_type import ComponentType
 
 
 class LearnableSpaceComponent:
@@ -17,13 +18,10 @@ class LearnableSpaceComponent:
     def get_scores(self) -> dict:
         return self.scores
 
-    def learn(self, component: str, feedback: int):
+    def learn(self, component: str, positive: bool):
+        feedback = 1 if positive else -1
         with self.lock:
-            if component in self.scores:
-                if self.scores[component] + feedback >= 1:
-                    self.scores[component] += feedback
-                else:
-                    self.scores[component] = 1
+            self.scores[component] = max(self.scores[component] + feedback, 1)
 
     def query(self):
         options = list(self.components.keys())
