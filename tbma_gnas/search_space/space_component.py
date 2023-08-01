@@ -1,7 +1,7 @@
 import random
 from threading import Lock
 
-from component_type import ComponentType
+from .component_type import ComponentType
 
 
 class LearnableSpaceComponent:

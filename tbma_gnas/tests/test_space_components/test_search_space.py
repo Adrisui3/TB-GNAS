@@ -1,19 +1,21 @@
-from tbma_gnas.search_space import space_component
+from torch_geometric import nn as geom_nn
+
 from tbma_gnas.search_space.component_type import ComponentType
+from tbma_gnas.search_space.space_component import LearnableSpaceComponent
 
 
 class TestSpaceComponent:
 
     def test_non_negative_scores(self):
-        layer = space_component.LearnableSpaceComponent(component_type=ComponentType.LAYER)
+        layer = LearnableSpaceComponent(component_type=ComponentType.LAYER)
         for sc in layer.get_scores().values():
             assert sc == 1
 
     def test_learning_component(self):
-        layer = space_component.LearnableSpaceComponent(component_type=ComponentType.LAYER)
+        layer = LearnableSpaceComponent(component_type=ComponentType.LAYER)
 
-        layer.learn("gatv1", 15)
-        assert layer.get_scores()["gatv1"] == 16
+        layer.learn(geom_nn.GATConv.__name__, True)
+        assert layer.get_scores()[geom_nn.GATConv.__name__] == 2
 
-        layer.learn("gatv1", -25)
-        assert layer.get_scores()["gatv1"] == 1
+        layer.learn(geom_nn.GATConv.__name__, False)
+        assert layer.get_scores()[geom_nn.GATConv.__name__] == 1
