@@ -20,7 +20,8 @@ class HyperParameters:
                                         in
                                         self.specific_parameters[layer].keys()}
 
-    def learn_for_layer(self, layer: str, prev_values: dict, positive: bool) -> None:
+    def learn_for_layer(self, layer: str, prev_values: dict, prev_ratio: DimensionRatio, positive: bool) -> None:
         with self.lock:
-            for param_name, prev_value in prev_values:
+            self.ratio.learn(prev_ratio, positive)
+            for param_name, prev_value in prev_values.items():
                 self.specific_parameters[layer][param_name].learn(prev_value, positive)
