@@ -15,6 +15,12 @@ class LearnableBlock:
 
         self.activation = LearnableSpaceComponent(ComponentType.ACTIVATION)
 
+    def get_input(self):
+        return self.is_input
+
+    def disable_output(self):
+        self.is_output = False
+
     def learn(self, layer, activation, positive: bool):
         self.layer.learn(component=layer.__class__.__name__, positive=positive)
 
