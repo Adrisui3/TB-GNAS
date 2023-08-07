@@ -11,10 +11,13 @@ class HyperModel(torch.nn.Module):
             self.layers.append(layer)
             self.layers.append(activation)
 
+    def get_blocks(self):
+        return [(self.layers[i], self.layers[i + 1]) for i in range(0, len(self.layers) - 1, 2)]
+
     def forward(self, x, edge_index):
         for i in range(0, len(self.layers) - 1, 2):
             x = self.layers[i](x, edge_index)
             if self.layers[i + 1]:
                 x = self.layers[i + 1](x)
 
-        return F.softmax(x, dim=1)
+        return F.log_softmax(x, dim=1)

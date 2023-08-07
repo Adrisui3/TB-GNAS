@@ -18,6 +18,9 @@ class LearnableBlock:
     def get_input(self):
         return self.is_input
 
+    def get_output(self):
+        return self.is_output
+
     def disable_output(self):
         self.is_output = False
 
