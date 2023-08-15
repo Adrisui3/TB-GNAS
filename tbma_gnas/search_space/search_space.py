@@ -10,6 +10,17 @@ def has_heads_parameter(layer):
     return "heads" in layer.__dict__.keys()
 
 
+def get_heads_from_layer(layer):
+    return layer.heads if has_heads_parameter(layer) else 1
+
+
+def compute_prev_block_heads(block_idx: int, blocks: list) -> int:
+    if block_idx > 0:
+        return get_heads_from_layer(blocks[block_idx - 1][0])
+
+    return 1
+
+
 class SearchSpace:
     def __init__(self, num_node_features: int, output_shape: int):
         self.output_shape = output_shape
@@ -26,62 +37,58 @@ class SearchSpace:
     def query_model_for_depth(self, depth: int) -> HyperModel:
         with self.lock:
             model = []
+            # If this is the first time the search space has been queried for a model of such depth, initialize it.
+            # It is worth noting that the queries must be in ascending order and there cannot be any gaps; that is:
+            # If the space has depths 1, 2 and 3, before querying for 5, a query for 4 must happen.
             if depth not in self.space.keys():
                 self.space[depth] = copy.deepcopy(self.space[depth - 1])
                 self.space[depth][-1].disable_output()
                 self.space[depth].append(LearnableBlock(is_output=True))
 
+            # Iterate over the blocks and query them with the appropriate input and output dimensions
             for block in self.space[depth]:
-                heads = 1
-                if model:
-                    heads = model[-1][0].heads if not block.get_input() and has_heads_parameter(model[-1][0]) else heads
-                prev_channels = model[-1][0].out_channels if not block.get_input() else self.num_node_features
+                prev_out_shape = model[-1][0].out_channels if not block.get_input() else self.num_node_features
+                if not block.get_input():
+                    heads = get_heads_from_layer(model[-1][0])
+                    prev_out_shape *= heads
 
-                gen_block = block.query(prev_out_channels=heads * prev_channels, output_shape=self.output_shape)
+                gen_block = block.query(prev_out_channels=prev_out_shape, output_shape=self.output_shape)
                 model.append(gen_block)
 
             return HyperModel(model_blocks=model)
 
-    def query_single_layer(self, model: HyperModel) -> HyperModel:
-        blocks = model.get_blocks()
-
-        print(blocks)
-
-        model_depth = len(blocks)
-        block_idx = random.randint(0, model_depth - 1)
-        print("Index:", block_idx)
-
-        old_block_heads = blocks[block_idx][0].heads if has_heads_parameter(blocks[block_idx][0]) else 1
-        old_block_out_shape = old_block_heads * blocks[block_idx][0].out_channels
-        print("Old output shape:", old_block_out_shape)
-
-        prev_block_heads = 1
-        if block_idx > 0:
-            prev_block_heads = blocks[block_idx - 1][0].heads if has_heads_parameter(
-                blocks[block_idx - 1][0]) else prev_block_heads
-        print("Previous block heads:", prev_block_heads)
-
-        new_in_channels = self.num_node_features if block_idx == 0 else prev_block_heads * blocks[block_idx - 1][
-            0].out_channels
-        new_block = self.space[model_depth][block_idx].query(prev_out_channels=new_in_channels,
-                                                             output_shape=self.output_shape)
-        blocks[block_idx] = new_block
-
-        new_block_heads = new_block[0].heads if has_heads_parameter(new_block[0]) else 1
+    def _adjust_next_block(self, new_block, old_block_out_shape: int, model_depth: int, block_idx: int, blocks: list):
+        new_block_heads = get_heads_from_layer(new_block[0])
         new_block_out_shape = new_block_heads * new_block[0].out_channels
-        print("New output shape:", new_block_out_shape)
+
+        # If the output shape of the old block differs from the new one, adjust the input of the next block
         if new_block_out_shape != old_block_out_shape and block_idx != model_depth - 1:
-            print("Adjusting next block")
             blocks[block_idx + 1] = self.space[model_depth][block_idx + 1].rebuild_block(
                 new_in_channels=new_block_heads * blocks[block_idx][0].out_channels)
 
-        print(blocks)
+    def _compute_new_in_channels(self, block_idx: int, blocks: list) -> int:
+        prev_block_heads = compute_prev_block_heads(block_idx, blocks)
+        return self.num_node_features if block_idx == 0 else prev_block_heads * blocks[block_idx - 1][0].out_channels
 
-        return HyperModel(model_blocks=blocks)
+    def query_single_layer(self, model: HyperModel) -> HyperModel:
+        with self.lock:
+            # Get current model's depth and pick a random block to be changed
+            blocks = model.get_blocks()
+            model_depth = len(blocks)
+            block_idx = random.randint(0, model_depth - 1)
 
+            # For compatibility purposes, the output shape of the block to be replaced needs to be stored
+            # so that the following ones can be adjusted if required
+            old_block_heads = get_heads_from_layer(blocks[block_idx][0])
+            old_block_out_shape = old_block_heads * blocks[block_idx][0].out_channels
 
-space = SearchSpace(num_node_features=25, output_shape=5)
-_ = space.query_model_for_depth(depth=2)
-_ = space.query_model_for_depth(depth=3)
-test_model = space.query_model_for_depth(depth=4)
-layer_changed = space.query_single_layer(test_model)
+            # Compute new input shape, query for a new block and substitute the old one
+            new_in_channels = self._compute_new_in_channels(block_idx, blocks)
+            new_block = self.space[model_depth][block_idx].query(prev_out_channels=new_in_channels,
+                                                                 output_shape=self.output_shape)
+            blocks[block_idx] = new_block
+
+            # Adjust the next block input dimensions if required
+            self._adjust_next_block(new_block, old_block_out_shape, model_depth, block_idx, blocks)
+
+            return HyperModel(model_blocks=blocks)
