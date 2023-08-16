@@ -1,3 +1,5 @@
+from typing import Any
+
 from .component_type import ComponentType
 from .hyperparameters.default_values import DEFAULT_HYPERPARAMETERS
 from .hyperparameters.dimension_ratio import DimensionRatio
@@ -26,6 +28,8 @@ class LearnableBlock:
         self.activation = LearnableSpaceComponent(ComponentType.ACTIVATION)
 
         self.prev_layer = None
+        self.prev_in_channels = None
+        self.prev_out_channels = None
         self.prev_hyperparameters = None
         self.prev_out_channels = None
         self.prev_act = None
@@ -50,6 +54,7 @@ class LearnableBlock:
 
     def rebuild_block(self, new_in_channels: int):
         if self.prev_layer and self.prev_act:
+            self.prev_in_channels = new_in_channels
             return self.prev_layer(in_channels=new_in_channels, out_channels=self.prev_out_channels,
                                    **self.prev_hyperparameters), self.prev_act()
 
@@ -57,10 +62,11 @@ class LearnableBlock:
         if "heads" in sampled_params.keys() and self.is_output:
             sampled_params["heads"] = 1
 
-    def _save_new_state(self, init_layer, params: dict, out_channels: int, init_act):
+    def _save_new_state(self, init_layer, params: dict, out_channels: int, in_channels: int, init_act):
         self.prev_layer = init_layer
-        self.prev_hyperparameters = params
+        self.prev_in_channels = in_channels
         self.prev_out_channels = out_channels
+        self.prev_hyperparameters = params
         self.prev_act = init_act
 
     def _compute_out_channels(self, output_shape: int, prev_out_channels: int, dim_ratio: DimensionRatio):
@@ -69,17 +75,24 @@ class LearnableBlock:
         return output_shape if self.is_output else (
             prev_out_channels if dim_ratio == DimensionRatio.EQUAL else max(prev_out_channels // 2, output_shape))
 
-    def query(self, prev_out_channels: int, output_shape: int):
+    def query_hyperparameters_for_layer(self, layer) -> tuple[Any, Any]:
+        _, new_params = self.layer_hyperparameters.query_for_layer(layer.__class__.__name__)
+        self._fix_heads_output_block(new_params)
+        self.prev_hyperparameters = new_params
+        return self.prev_layer(in_channels=self.prev_in_channels, out_channels=self.prev_out_channels,
+                               **new_params), self.prev_act()
+
+    def query(self, prev_out_shape: int, output_shape: int) -> tuple[Any, Any]:
         # Query every component individually: layer, parameters and activation function
         init_layer = self.layer.query()
         dim_ratio, params = self.layer_hyperparameters.query_for_layer(init_layer.__name__)
-        out_channels = self._compute_out_channels(output_shape, prev_out_channels, dim_ratio)
+        out_channels = self._compute_out_channels(output_shape, prev_out_shape, dim_ratio)
         init_act = self.activation.query()
 
         # If the block is an output block, and it has heads parameter, set it to one manually so that the output shape is coherent with the problem's requirements
         self._fix_heads_output_block(params)
 
         # Save the new state of the block so that it can be rebuilt if required
-        self._save_new_state(init_layer, params, out_channels, init_act)
+        self._save_new_state(init_layer, params, out_channels, prev_out_shape, init_act)
 
-        return init_layer(in_channels=prev_out_channels, out_channels=out_channels, **params), init_act()
+        return init_layer(in_channels=prev_out_shape, out_channels=out_channels, **params), init_act()

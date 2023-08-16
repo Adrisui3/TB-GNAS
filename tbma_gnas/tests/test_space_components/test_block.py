@@ -5,13 +5,13 @@ class TestBlock:
 
     def test_output_block(self):
         block = LearnableBlock(is_output=True)
-        layer, _ = block.query(prev_out_channels=15, output_shape=6)
+        layer, _ = block.query(prev_out_shape=15, output_shape=6)
 
         assert layer.out_channels == 6
 
     def test_learning(self):
         block = LearnableBlock()
-        layer, act = block.query(prev_out_channels=10, output_shape=5)
+        layer, act = block.query(prev_out_shape=10, output_shape=5)
 
         block.learn(layer=layer, activation=act, positive=True)
         assert any(score > 1 for score in block.layer.get_scores().values())

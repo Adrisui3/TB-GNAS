@@ -10,6 +10,11 @@ def has_heads_parameter(layer):
     return "heads" in layer.__dict__.keys()
 
 
+def reset_model_parameters(model_blocks: list):
+    for block in model_blocks:
+        block[0].reset_parameters()
+
+
 def get_heads_from_layer(layer):
     return layer.heads if has_heads_parameter(layer) else 1
 
@@ -34,7 +39,7 @@ class SearchSpace:
             for lay_act, block in zip(model.get_blocks(), self.space[depth]):
                 block.learn(layer=lay_act[0], activation=lay_act[1], positive=positive)
 
-    def query_model_for_depth(self, depth: int) -> HyperModel:
+    def query_for_depth(self, depth: int) -> HyperModel:
         with self.lock:
             model = []
             # If this is the first time the search space has been queried for a model of such depth, initialize it.
@@ -52,7 +57,7 @@ class SearchSpace:
                     heads = get_heads_from_layer(model[-1][0])
                     prev_out_shape *= heads
 
-                gen_block = block.query(prev_out_channels=prev_out_shape, output_shape=self.output_shape)
+                gen_block = block.query(prev_out_shape=prev_out_shape, output_shape=self.output_shape)
                 model.append(gen_block)
 
             return HyperModel(model_blocks=model)
@@ -70,7 +75,7 @@ class SearchSpace:
         prev_block_heads = compute_prev_block_heads(block_idx, blocks)
         return self.num_node_features if block_idx == 0 else prev_block_heads * blocks[block_idx - 1][0].out_channels
 
-    def query_single_layer(self, model: HyperModel) -> HyperModel:
+    def query_for_component(self, model: HyperModel, complete_layer: bool) -> HyperModel:
         with self.lock:
             # Get current model's depth and pick a random block to be changed
             blocks = model.get_blocks()
@@ -84,11 +89,20 @@ class SearchSpace:
 
             # Compute new input shape, query for a new block and substitute the old one
             new_in_channels = self._compute_new_in_channels(block_idx, blocks)
-            new_block = self.space[model_depth][block_idx].query(prev_out_channels=new_in_channels,
-                                                                 output_shape=self.output_shape)
+
+            if complete_layer:
+                new_block = self.space[model_depth][block_idx].query(prev_out_shape=new_in_channels,
+                                                                     output_shape=self.output_shape)
+            else:
+                new_block = self.space[model_depth][block_idx].query_hyperparameters_for_layer(blocks[block_idx][0])
+
+            # Update the block
             blocks[block_idx] = new_block
 
             # Adjust the next block input dimensions if required
             self._adjust_next_block(new_block, old_block_out_shape, model_depth, block_idx, blocks)
+
+            # Reset model parameters to avoid overfitting when training the model again.
+            reset_model_parameters(blocks)
 
             return HyperModel(model_blocks=blocks)
