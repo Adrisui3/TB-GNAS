@@ -1,20 +1,10 @@
 from typing import Any
 
 from .component_type import ComponentType
-from .hyperparameters.default_values import DEFAULT_HYPERPARAMETERS
 from .hyperparameters.dimension_ratio import DimensionRatio
 from .hyperparameters.hyperparameters import HyperParameters
 from .space_component import LearnableSpaceComponent
-
-
-def retrieve_previous_config(layer):
-    # Given a layer, it retrieves the set of parameters and values which are considered for optimization.
-    # It is worth noting that the complete set of parameters of the layer might be bigger.
-    prev_params = {key: layer.__dict__[key] for key in layer.__dict__.keys() if
-                   key in DEFAULT_HYPERPARAMETERS[layer.__class__.__name__].keys()}
-    prev_ratio = DimensionRatio.EQUAL if layer.in_channels == layer.out_channels else DimensionRatio.REDUCE
-
-    return prev_params, prev_ratio
+from .utils import retrieve_layer_config
 
 
 class LearnableBlock:
@@ -46,7 +36,7 @@ class LearnableBlock:
     def learn(self, layer, activation, positive: bool):
         # Call the learn methods of each component individually with the corresponding feedback
         self.layer.learn(component=layer.__class__.__name__, positive=positive)
-        prev_params, prev_ratio = retrieve_previous_config(layer)
+        prev_params, prev_ratio = retrieve_layer_config(layer)
         self.layer_hyperparameters.learn_for_layer(layer=layer.__class__.__name__, prev_values=prev_params,
                                                    prev_ratio=prev_ratio, positive=positive)
 
@@ -69,11 +59,21 @@ class LearnableBlock:
         self.prev_hyperparameters = params
         self.prev_act = init_act
 
-    def _compute_out_channels(self, output_shape: int, prev_out_channels: int, dim_ratio: DimensionRatio):
+    def _compute_out_channels(self, num_node_features: int, output_shape: int, prev_out_channels: int,
+                              dim_ratio: DimensionRatio):
         # If the DimensionRatio is set to EQUAL, then the block will keep the input shape and the output shape equals,
         # on the other hand, if it's set to REDUCE, it will reduce the dimension to a half.
-        return output_shape if self.is_output else (
-            prev_out_channels if dim_ratio == DimensionRatio.EQUAL else max(prev_out_channels // 2, output_shape))
+
+        if self.is_output:
+            return output_shape
+
+        match dim_ratio:
+            case DimensionRatio.EQUAL:
+                return prev_out_channels
+            case DimensionRatio.REDUCE:
+                return max(prev_out_channels // 2, output_shape)
+            case DimensionRatio.INCREASE:
+                return min(prev_out_channels * 2, num_node_features)
 
     def query_hyperparameters_for_layer(self, layer) -> tuple[Any, Any]:
         _, new_params = self.layer_hyperparameters.query_for_layer(layer.__class__.__name__)
@@ -82,11 +82,11 @@ class LearnableBlock:
         return self.prev_layer(in_channels=self.prev_in_channels, out_channels=self.prev_out_channels,
                                **new_params), self.prev_act()
 
-    def query(self, prev_out_shape: int, output_shape: int) -> tuple[Any, Any]:
+    def query(self, prev_out_shape: int, num_node_features: int, output_shape: int) -> tuple[Any, Any]:
         # Query every component individually: layer, parameters and activation function
         init_layer = self.layer.query()
         dim_ratio, params = self.layer_hyperparameters.query_for_layer(init_layer.__name__)
-        out_channels = self._compute_out_channels(output_shape, prev_out_shape, dim_ratio)
+        out_channels = self._compute_out_channels(num_node_features, output_shape, prev_out_shape, dim_ratio)
         init_act = self.activation.query()
 
         # If the block is an output block, and it has heads parameter, set it to one manually so that the output shape is coherent with the problem's requirements

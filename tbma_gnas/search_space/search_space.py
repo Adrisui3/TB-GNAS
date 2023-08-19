@@ -4,26 +4,7 @@ from threading import Lock
 
 from .block import LearnableBlock
 from .hypermodel import HyperModel
-
-
-def has_heads_parameter(layer):
-    return "heads" in layer.__dict__.keys()
-
-
-def reset_model_parameters(model_blocks: list):
-    for block in model_blocks:
-        block[0].reset_parameters()
-
-
-def get_heads_from_layer(layer):
-    return layer.heads if has_heads_parameter(layer) else 1
-
-
-def compute_prev_block_heads(block_idx: int, blocks: list) -> int:
-    if block_idx > 0:
-        return get_heads_from_layer(blocks[block_idx - 1][0])
-
-    return 1
+from .utils import get_heads_from_layer, compute_prev_block_heads, reset_model_parameters
 
 
 class SearchSpace:
@@ -57,7 +38,8 @@ class SearchSpace:
                     heads = get_heads_from_layer(model[-1][0])
                     prev_out_shape *= heads
 
-                gen_block = block.query(prev_out_shape=prev_out_shape, output_shape=self.output_shape)
+                gen_block = block.query(prev_out_shape=prev_out_shape, num_node_features=self.num_node_features,
+                                        output_shape=self.output_shape)
                 model.append(gen_block)
 
             return HyperModel(model_blocks=model)
@@ -92,6 +74,7 @@ class SearchSpace:
 
             if complete_layer:
                 new_block = self.space[model_depth][block_idx].query(prev_out_shape=new_in_channels,
+                                                                     num_node_features=self.num_node_features,
                                                                      output_shape=self.output_shape)
             else:
                 new_block = self.space[model_depth][block_idx].query_hyperparameters_for_layer(blocks[block_idx][0])

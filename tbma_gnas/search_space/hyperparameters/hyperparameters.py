@@ -5,7 +5,7 @@ from .hyperparameter import HyperParameter
 
 class HyperParameters:
     def __init__(self):
-        self.ratio = HyperParameter(values=[DimensionRatio.EQUAL, DimensionRatio.REDUCE])
+        self.ratio = HyperParameter(values=[DimensionRatio.EQUAL, DimensionRatio.REDUCE, DimensionRatio.INCREASE])
         self.specific_parameters = {
             layer_name: {param_name: HyperParameter(values=DEFAULT_HYPERPARAMETERS[layer_name][param_name]) for
                          param_name in DEFAULT_HYPERPARAMETERS[layer_name].keys()} for layer_name in

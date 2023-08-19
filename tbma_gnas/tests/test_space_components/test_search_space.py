@@ -1,7 +1,7 @@
 from tbma_gnas.search_space.search_space import SearchSpace
 
 
-class TestSeachSpace:
+class TestSearchSpace:
 
     def test_input_output_blocks(self):
         space = SearchSpace(num_node_features=20, output_shape=5)
