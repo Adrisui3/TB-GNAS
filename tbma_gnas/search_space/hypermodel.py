@@ -24,6 +24,9 @@ class HyperModel(torch.nn.Module):
 
         return F.log_softmax(x, dim=1)
 
+    def size(self):
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
+
     def __hash__(self):
         to_hash = []
         for bl in self.get_blocks():
