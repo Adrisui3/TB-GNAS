@@ -11,7 +11,11 @@ class Evaluator:
     def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    def get_device(self) -> str:
+        return str(self.device)
+
     def low_fidelity_estimation(self, model: HyperModel, dataset, verbose: bool = False):
+        print(model.get_blocks())
         data = dataset[0].to(self.device)
         model.to(self.device)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)

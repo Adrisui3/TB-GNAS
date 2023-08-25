@@ -29,16 +29,11 @@ class FuzzyComparator:
         acc_label = self.acc_variable.compute_matching_label(x=acc_ratio - 1)
         size_label = self.size_variable.compute_matching_label(x=size_ratio - 1)
 
-        print(acc_ratio - 1)
-        print(size_ratio - 1)
-
         return acc_label, size_label
 
     def improvement(self, ref_size: int, ref_val_acc: float, cand_size: int, cand_val_acc: float) -> bool:
         acc_label, size_label = self.compute_matching_labels(size_ratio=cand_size / ref_size,
                                                              acc_ratio=cand_val_acc / ref_val_acc)
-
-        print(acc_label, size_label)
 
         return (acc_label == AccLabel.EQUAL and size_label == SizeLabel.SMALLER) or (
                 acc_label == AccLabel.EQUAL and size_label == SizeLabel.EQUAL) or (
