@@ -4,7 +4,8 @@ from threading import Lock
 
 from .block import LearnableBlock
 from .hypermodel import HyperModel
-from .utils import get_heads_from_layer, compute_prev_block_heads, reset_model_parameters
+from .utils import get_heads_from_layer, compute_prev_block_heads, reset_model_parameters, get_concat_from_layer, \
+    compute_prev_block_concat
 
 
 class SearchSpace:
@@ -35,9 +36,10 @@ class SearchSpace:
             for block in self.space[depth]:
                 prev_out_shape = model[-1][0].out_channels if not block.get_input() else self.num_node_features
                 if not block.get_input():
-                    heads = get_heads_from_layer(model[-1][0])
-                    prev_out_shape *= heads
-
+                    concat = get_concat_from_layer(model[-1][0])
+                    if concat:
+                        heads = get_heads_from_layer(model[-1][0])
+                        prev_out_shape *= heads
                 gen_block = block.query(prev_out_shape=prev_out_shape, num_node_features=self.num_node_features,
                                         output_shape=self.output_shape)
                 model.append(gen_block)
@@ -46,16 +48,25 @@ class SearchSpace:
 
     def _adjust_next_block(self, new_block, old_block_out_shape: int, model_depth: int, block_idx: int, blocks: list):
         new_block_heads = get_heads_from_layer(new_block[0])
-        new_block_out_shape = new_block_heads * new_block[0].out_channels
+        new_block_concat = get_concat_from_layer(new_block[0])
+        new_block_out_shape = new_block_heads * new_block[0].out_channels if new_block_concat else new_block[
+            0].out_channels
 
         # If the output shape of the old block differs from the new one, adjust the input of the next block
         if new_block_out_shape != old_block_out_shape and block_idx != model_depth - 1:
             blocks[block_idx + 1] = self.space[model_depth][block_idx + 1].rebuild_block(
-                new_in_channels=new_block_heads * blocks[block_idx][0].out_channels)
+                new_in_channels=new_block_out_shape)
 
     def _compute_new_in_channels(self, block_idx: int, blocks: list) -> int:
-        prev_block_heads = compute_prev_block_heads(block_idx, blocks)
-        return self.num_node_features if block_idx == 0 else prev_block_heads * blocks[block_idx - 1][0].out_channels
+        if block_idx == 0:
+            return self.num_node_features
+
+        prev_block_concat = compute_prev_block_concat(block_idx, blocks)
+        if prev_block_concat:
+            prev_block_heads = compute_prev_block_heads(block_idx, blocks)
+            return prev_block_heads * blocks[block_idx - 1][0].out_channels
+
+        return blocks[block_idx - 1][0].out_channels
 
     def query_for_component(self, model: HyperModel, complete_layer: bool) -> HyperModel:
         with self.lock:
