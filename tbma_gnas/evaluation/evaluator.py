@@ -15,7 +15,6 @@ class Evaluator:
         return str(self.device)
 
     def low_fidelity_estimation(self, model: HyperModel, dataset, verbose: bool = False):
-        print(model.get_blocks())
         data = dataset[0].to(self.device)
         model.to(self.device)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)

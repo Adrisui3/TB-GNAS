@@ -21,7 +21,6 @@ class LearnableBlock:
         self.prev_in_channels = None
         self.prev_out_channels = None
         self.prev_hyperparameters = None
-        self.prev_out_channels = None
         self.prev_act = None
 
     def get_input(self):
@@ -42,24 +41,23 @@ class LearnableBlock:
 
         self.activation.learn(component=activation.__class__.__name__, positive=positive)
 
+    def set_previous_state(self, block: tuple):
+        self.prev_layer = self.layer.get_components()[block[0].__class__.__name__]
+        self.prev_in_channels = block[0].in_channels
+        self.prev_out_channels = block[0].out_channels
+        prev_hyperparams, _ = retrieve_layer_config(block[0])
+        self.prev_hyperparameters = prev_hyperparams
+        self.prev_act = self.activation.get_components()[block[1].__class__.__name__]
+
     def rebuild_block(self, new_in_channels: int):
-        if self.prev_layer and self.prev_act:
-            self.prev_in_channels = new_in_channels
-            return self.prev_layer(in_channels=new_in_channels, out_channels=self.prev_out_channels,
-                                   **self.prev_hyperparameters), self.prev_act()
+        return self.prev_layer(in_channels=new_in_channels, out_channels=self.prev_out_channels,
+                               **self.prev_hyperparameters), self.prev_act()
 
     def _fix_heads_output_block(self, sampled_params: dict):
         concat = sampled_params["concat"] if "concat" in sampled_params.keys() else False
         heads = sampled_params["heads"] if "heads" in sampled_params.keys() else 1
         if concat and "concat" in sampled_params.keys() and heads > 1 and self.is_output:
             sampled_params["concat"] = False
-
-    def _save_new_state(self, init_layer, params: dict, out_channels: int, in_channels: int, init_act):
-        self.prev_layer = init_layer
-        self.prev_in_channels = in_channels
-        self.prev_out_channels = out_channels
-        self.prev_hyperparameters = params
-        self.prev_act = init_act
 
     def _compute_out_channels(self, num_node_features: int, output_shape: int, prev_out_channels: int,
                               dim_ratio: DimensionRatio, params: dict) -> int:
@@ -81,7 +79,6 @@ class LearnableBlock:
     def query_hyperparameters_for_layer(self, layer) -> tuple[Any, Any]:
         _, new_params = self.layer_hyperparameters.query_for_layer(layer.__class__.__name__)
         self._fix_heads_output_block(new_params)
-        self.prev_hyperparameters = new_params
         return self.prev_layer(in_channels=self.prev_in_channels, out_channels=self.prev_out_channels,
                                **new_params), self.prev_act()
 
@@ -96,8 +93,5 @@ class LearnableBlock:
 
         # Compute the output shape
         out_channels = self._compute_out_channels(num_node_features, output_shape, prev_out_shape, dim_ratio, params)
-
-        # Save the new state of the block so that it can be rebuilt if required
-        self._save_new_state(init_layer, params, out_channels, prev_out_shape, init_act)
 
         return init_layer(in_channels=prev_out_shape, out_channels=out_channels, **params), init_act()

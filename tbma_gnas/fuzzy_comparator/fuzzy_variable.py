@@ -7,7 +7,9 @@ class FuzzyVariable:
         self.labels = labels
         self.config = [[-np.inf, -np.inf, abcdefgh[0], abcdefgh[1]],
                        [abcdefgh[2], abcdefgh[3], abcdefgh[4], abcdefgh[5]],
-                       [abcdefgh[6], abcdefgh[7], np.inf, np.inf]]
+                       [abcdefgh[6], abcdefgh[7], abcdefgh[8], abcdefgh[9]],
+                       [abcdefgh[10], abcdefgh[11], abcdefgh[12], abcdefgh[13]],
+                       [abcdefgh[14], abcdefgh[15], np.inf, np.inf]]
 
     def compute_matching_label(self, x: float):
         memberships = []

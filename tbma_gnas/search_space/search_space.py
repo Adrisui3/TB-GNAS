@@ -21,6 +21,13 @@ class SearchSpace:
             for lay_act, block in zip(model.get_blocks(), self.space[depth]):
                 block.learn(layer=lay_act[0], activation=lay_act[1], positive=positive)
 
+    def update_previous_state(self, model: HyperModel):
+        with self.lock:
+            blocks = model.get_blocks()
+            depth = len(blocks)
+            for learnable_block, model_block in zip(self.space[depth], blocks):
+                learnable_block.set_previous_state(model_block)
+
     def query_for_depth(self, depth: int) -> HyperModel:
         with self.lock:
             model = []
