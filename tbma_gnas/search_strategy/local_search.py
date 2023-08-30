@@ -42,7 +42,6 @@ def local_search(dataset, num_iter: int,
 
     for i in range(num_iter):
         logger.info("Iteration " + str(i))
-        print(operator_weights)
         op_idx = random.choices(population=range(len(operators)), weights=operator_weights, k=1)[0]
         operator = operators[op_idx]
         logger.info("Selected operator: " + operator.__name__)
@@ -83,7 +82,12 @@ def local_search(dataset, num_iter: int,
         except Exception as exception:
             logger.warning("A model could not be handled: " + str(new_model.get_blocks()))
             logger.warning("Size: " + str(new_model.size()))
-            logger.warning("Reason: " + str(exception))
+            if "shapes cannot be multiplied" in str(exception):
+                logger.error("Reason: " + str(exception))
+                raise
+            else:
+                logger.warning("Reason: " + str(exception))
+
             operator_weights[op_idx] = max(operator_weights[op_idx] - 1, 1)
 
     print(history_acc)
@@ -94,8 +98,17 @@ def local_search(dataset, num_iter: int,
 
 cora = Planetoid(root='/tmp/PubMed', name='PubMed')
 t_ini = time.time()
-gnn, acc = local_search(dataset=cora, num_iter=500)
+gnn, acc = local_search(dataset=cora, num_iter=1000)
 print("Runtime: ", time.time() - t_ini)
 print("Blocks: ", gnn.get_blocks())
 print("Size: ", gnn.size())
 print("Validation accuracy:", acc)
+
+'''
+--- PubMed ---
+Runtime:  1089.2492578029633
+Blocks:  [(GATv2Conv(500, 500, heads=1), Tanh()), (GATv2Conv(500, 3, heads=1), Sigmoid())]
+Size:  505012
+Validation accuracy: 0.808
+
+'''

@@ -35,6 +35,7 @@ def improvement(acc_label: AccLabel, size_label: SizeLabel) -> bool:
             acc_label == AccLabel.MORE and size_label == SizeLabel.SMALLER) or (
             acc_label == AccLabel.MORE and size_label == SizeLabel.EQUAL) or (
             acc_label == AccLabel.MORE and size_label == SizeLabel.BIGGER) or (
+            acc_label == AccLabel.MORE and size_label == SizeLabel.MUCH_BIGGER) or (
             acc_label == AccLabel.MUCH_MORE and size_label == SizeLabel.MUCH_SMALLER) or (
             acc_label == AccLabel.MUCH_MORE and size_label == SizeLabel.SMALLER) or (
             acc_label == AccLabel.MUCH_MORE and size_label == SizeLabel.EQUAL) or (

@@ -46,6 +46,7 @@ class LearnableBlock:
         self.prev_in_channels = block[0].in_channels
         self.prev_out_channels = block[0].out_channels
         prev_hyperparams, _ = retrieve_layer_config(block[0])
+        print(prev_hyperparams)
         self.prev_hyperparameters = prev_hyperparams
         self.prev_act = self.activation.get_components()[block[1].__class__.__name__]
 
@@ -93,5 +94,10 @@ class LearnableBlock:
 
         # Compute the output shape
         out_channels = self._compute_out_channels(num_node_features, output_shape, prev_out_shape, dim_ratio, params)
+
+        print("Layer: ", init_layer)
+        print("Prev output shape:", prev_out_shape)
+        print("Out channels:", prev_out_shape)
+        print("Params: ", params)
 
         return init_layer(in_channels=prev_out_shape, out_channels=out_channels, **params), init_act()
