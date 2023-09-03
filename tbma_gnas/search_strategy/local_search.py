@@ -14,7 +14,7 @@ def local_search(dataset, num_iter: int,
                  operators: list = [increase_depth, change_layer, change_hyperparameters, decrease_depth]):
     logger = Logger()
     logger.info("Starting local search for " + str(num_iter) + " iterations")
-    search_space = SearchSpace(num_node_features=dataset.num_node_features, output_shape=dataset.num_classes)
+    search_space = SearchSpace(num_node_features=dataset.num_node_features, data_out_shape=dataset.num_classes)
     logger.info("Search Space initialized")
     evaluator = Evaluator()
     logger.info("Evaluator initialized. Device: " + evaluator.get_device())
@@ -25,9 +25,7 @@ def local_search(dataset, num_iter: int,
 
     logger.info("Generating and training initial model - STARTING")
     # TODO: Think of some sort of warmup for the search space
-    search_space.query_for_depth(depth=1)
-    search_space.query_for_depth(depth=2)
-    best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.query_for_depth(depth=3),
+    best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.query_for_depth(depth=1),
                                                              dataset=dataset)
     best_size = best_model.size()
     search_space.update_previous_state(model=best_model)
@@ -71,8 +69,8 @@ def local_search(dataset, num_iter: int,
                 search_space.learn(model=best_model, positive=True)
                 search_space.update_previous_state(model=best_model)
                 operator_weights[op_idx] += 1
-                history_acc.append(best_acc)
-                history_size.append(best_size)
+                history_acc.append((best_acc, i))
+                history_size.append((best_size, i))
                 logger.info("Best model updated")
             elif penalization(acc_label=acc_label, size_label=size_label):
                 search_space.learn(model=new_model, positive=False)
@@ -103,6 +101,11 @@ print("Runtime: ", time.time() - t_ini)
 print("Blocks: ", gnn.get_blocks())
 print("Size: ", gnn.size())
 print("Validation accuracy:", acc)
+
+'''
+trans = geom_nn.TransformerConv(in_channels=50, out_channels=20, heads=3, concat=True)
+print(trans.__dict__)
+'''
 
 '''
 --- PubMed ---
