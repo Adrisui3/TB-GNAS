@@ -75,7 +75,7 @@ class LearnableBlock:
         self.prev_act = self.activation.get_components()[block[1].__class__.__name__]
 
     def rebuild_block(self, new_in_channels: int = None, new_out_channels: int = None, new_params: dict = None) -> \
-    tuple[Any, Any]:
+            tuple[Any, Any]:
         in_channels = new_in_channels if new_in_channels else self.prev_in_channels
         out_channels = new_out_channels if new_out_channels else self.prev_out_channels
         params = new_params if new_params else self.prev_hyperparameters
@@ -84,7 +84,6 @@ class LearnableBlock:
 
     def query_hyperparameters_for_layer(self, layer) -> tuple[Any, Any]:
         _, new_params = self.layer_hyperparameters.query_for_layer(layer.__class__.__name__)
-        print("New params: ", new_params)
         fix_heads_output_block(self.is_output, new_params)
         return self.prev_layer(in_channels=self.prev_in_channels, out_channels=self.prev_out_channels,
                                **new_params), self.prev_act()

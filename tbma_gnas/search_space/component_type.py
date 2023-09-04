@@ -8,6 +8,7 @@ class ComponentType(Enum):
     LAYER = {geom_nn.GATv2Conv.__name__: geom_nn.GATv2Conv,
              geom_nn.ChebConv.__name__: geom_nn.ChebConv,
              geom_nn.GCNConv.__name__: geom_nn.GCNConv,
+             geom_nn.GraphConv.__name__: geom_nn.GraphConv,
              geom_nn.TransformerConv.__name__: geom_nn.TransformerConv}
 
     ACTIVATION = {nn.ReLU.__name__: nn.ReLU,

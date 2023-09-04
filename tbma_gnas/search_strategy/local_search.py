@@ -24,9 +24,7 @@ def local_search(dataset, num_iter: int,
     operator_weights = [num_iter] * len(operators)
 
     logger.info("Generating and training initial model - STARTING")
-    # TODO: Think of some sort of warmup for the search space
-    best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.query_for_depth(depth=1),
-                                                             dataset=dataset)
+    best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model(), dataset=dataset)
     best_size = best_model.size()
     search_space.update_previous_state(model=best_model)
     model_cache[best_model] = best_acc
@@ -35,8 +33,7 @@ def local_search(dataset, num_iter: int,
     logger.info("Initial validation accuracy: " + str(best_acc))
     logger.info("Initial model size: " + str(best_size))
 
-    history_acc = [best_acc]
-    history_size = [best_size]
+    history = [(0, best_acc, best_size)]
 
     for i in range(num_iter):
         logger.info("Iteration " + str(i))
@@ -63,14 +60,11 @@ def local_search(dataset, num_iter: int,
             logger.info("Fuzzy labels - Accuracy: " + str(acc_label) + " Size: " + str(size_label))
 
             if improvement(acc_label=acc_label, size_label=size_label):
-                best_model = new_model
-                best_acc = new_acc
-                best_size = new_size
+                best_model, best_acc, best_size = new_model, new_acc, new_size
                 search_space.learn(model=best_model, positive=True)
                 search_space.update_previous_state(model=best_model)
                 operator_weights[op_idx] += 1
-                history_acc.append((best_acc, i))
-                history_size.append((best_size, i))
+                history.append((i, best_acc, best_size))
                 logger.info("Best model updated")
             elif penalization(acc_label=acc_label, size_label=size_label):
                 search_space.learn(model=new_model, positive=False)
@@ -88,19 +82,23 @@ def local_search(dataset, num_iter: int,
 
             operator_weights[op_idx] = max(operator_weights[op_idx] - 1, 1)
 
-    print(history_acc)
-    print(history_size)
-
-    return best_model, best_acc
+    return best_model, best_acc, history
 
 
-cora = Planetoid(root='/tmp/PubMed', name='PubMed')
-t_ini = time.time()
-gnn, acc = local_search(dataset=cora, num_iter=1000)
-print("Runtime: ", time.time() - t_ini)
-print("Blocks: ", gnn.get_blocks())
-print("Size: ", gnn.size())
-print("Validation accuracy:", acc)
+pubmed = Planetoid(root='/tmp/PubMed', name='PubMed')
+cora = Planetoid(root='/tmp/Cora', name='Cora')
+dfs = [pubmed]
+
+for df in dfs:
+    for _ in range(1):
+        print("---- DATASET: ", str(df), " ---- ITER: ", _)
+        t_ini = time.time()
+        gnn, acc, hist = local_search(dataset=df, num_iter=1000)
+        print("Runtime: ", time.time() - t_ini)
+        print("History: ", hist)
+        print("Blocks: ", gnn.get_blocks())
+        print("Size: ", gnn.size())
+        print("Validation accuracy:", acc)
 
 '''
 trans = geom_nn.TransformerConv(in_channels=50, out_channels=20, heads=3, concat=True)

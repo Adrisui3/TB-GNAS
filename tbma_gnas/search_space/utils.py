@@ -37,6 +37,12 @@ def compute_prev_block_concat(block_idx: int, blocks: list) -> bool:
     return False
 
 
+def compute_layer_out_shape(layer):
+    block_heads = get_heads_from_layer(layer)
+    block_concat = get_concat_from_layer(layer)
+    return block_heads * layer.out_channels if block_concat else layer.out_channels
+
+
 def update_for_cheb_conv(prev_params: dict, layer):
     # This is a workaround used to retrieve parameter K for ChebConv since it's not stored as usual
     if "K" in DEFAULT_HYPERPARAMETERS[layer.__class__.__name__].keys() and "K" not in prev_params:

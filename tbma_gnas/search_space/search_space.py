@@ -2,10 +2,13 @@ import copy
 import random
 from threading import Lock
 
+from torch import nn
+from torch_geometric import nn as geom_nn
+
 from .block import LearnableBlock, compute_out_channels, fix_heads_output_block
 from .hypermodel import HyperModel
 from .utils import get_heads_from_layer, compute_prev_block_heads, reset_model_parameters, get_concat_from_layer, \
-    compute_prev_block_concat, retrieve_layer_config
+    compute_prev_block_concat, retrieve_layer_config, compute_layer_out_shape
 
 
 def compute_prev_out_shape(prev_layer):
@@ -24,6 +27,10 @@ class SearchSpace:
         self.num_node_features = num_node_features
         self.space = {1: [LearnableBlock(is_input=True, is_output=True)]}
         self.lock = Lock()
+
+    def get_init_model(self) -> HyperModel:
+        return HyperModel(
+            [(geom_nn.GraphConv(in_channels=self.num_node_features, out_channels=self.data_out_shape), nn.ReLU())])
 
     def learn(self, model: HyperModel, positive: bool):
         with self.lock:
@@ -74,7 +81,6 @@ class SearchSpace:
                                                 dim_ratio, params)
 
         blocks[-1] = self.space[new_depth - 1][-1].rebuild_block(new_out_channels=new_out_channels)
-        print(blocks[-1])
         current_out_shape = compute_prev_out_shape(blocks[-1][0])
         blocks.append(self.space[new_depth][-1].query(current_out_shape, self.num_node_features, self.data_out_shape))
 
@@ -96,13 +102,7 @@ class SearchSpace:
         return HyperModel(model_blocks=blocks)
 
     def _adjust_next_block(self, new_block, old_block_out_shape: int, model_depth: int, block_idx: int, blocks: list):
-        new_block_heads = get_heads_from_layer(new_block[0])
-        new_block_concat = get_concat_from_layer(new_block[0])
-        new_block_out_shape = new_block_heads * new_block[0].out_channels if new_block_concat else new_block[
-            0].out_channels
-
-        print("Old out shape: ", old_block_out_shape)
-        print("New out chape: ", new_block_out_shape)
+        new_block_out_shape = compute_layer_out_shape(new_block[0])
 
         # If the output shape of the old block differs from the new one, adjust the input of the next block
         if new_block_out_shape != old_block_out_shape and block_idx != model_depth - 1:
@@ -127,10 +127,8 @@ class SearchSpace:
             model_depth = len(blocks)
             block_idx = random.randint(0, model_depth - 1)
 
-            # For compatibility purposes, the output shape of the block to be replaced needs to be stored
-            # so that the following ones can be adjusted if required
-            old_block_heads = get_heads_from_layer(blocks[block_idx][0])
-            old_block_out_shape = old_block_heads * blocks[block_idx][0].out_channels
+            # Retrieve old block output shape in order to check if adjustments are necessary once its updated
+            old_block_out_shape = compute_layer_out_shape(blocks[block_idx][0])
 
             # Compute new input shape, query for a new block and substitute the old one
             new_in_channels = self._compute_new_in_channels(block_idx, blocks)
@@ -140,10 +138,6 @@ class SearchSpace:
                                                                      num_node_features=self.num_node_features,
                                                                      data_out_shape=self.data_out_shape)
             else:
-                print("Block idx: ", block_idx)
-                print("Block: ", blocks[block_idx])
-                params, _ = retrieve_layer_config(blocks[block_idx][0])
-                print("Prev params: ", params)
                 new_block = self.space[model_depth][block_idx].query_hyperparameters_for_layer(blocks[block_idx][0])
 
             # Update the block
