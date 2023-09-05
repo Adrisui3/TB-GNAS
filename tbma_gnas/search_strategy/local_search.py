@@ -80,8 +80,6 @@ def local_search(dataset, num_iter: int,
             else:
                 logger.warning("Reason: " + str(exception))
 
-            operator_weights[op_idx] = max(operator_weights[op_idx] - 1, 1)
-
     return best_model, best_acc, history
 
 
@@ -93,7 +91,7 @@ for df in dfs:
     for _ in range(1):
         print("---- DATASET: ", str(df), " ---- ITER: ", _)
         t_ini = time.time()
-        gnn, acc, hist = local_search(dataset=df, num_iter=1000)
+        gnn, acc, hist = local_search(dataset=df, num_iter=250)
         print("Runtime: ", time.time() - t_ini)
         print("History: ", hist)
         print("Blocks: ", gnn.get_blocks())

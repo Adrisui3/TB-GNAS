@@ -14,6 +14,7 @@ class Evaluator:
     def get_device(self) -> str:
         return str(self.device)
 
+    # TODO: Improve this estimation by using early stopping and modularize iterations as shown in https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
     def low_fidelity_estimation(self, model: HyperModel, dataset, verbose: bool = False):
         data = dataset[0].to(self.device)
         model.to(self.device)
