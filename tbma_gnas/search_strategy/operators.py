@@ -1,3 +1,5 @@
+import random
+
 from tbma_gnas.search_space.hypermodel import HyperModel
 from tbma_gnas.search_space.search_space import SearchSpace
 
@@ -16,3 +18,11 @@ def change_layer(space: SearchSpace, model: HyperModel):
 
 def change_hyperparameters(space: SearchSpace, model: HyperModel):
     return space.query_for_component(model=model, complete_layer=False)
+
+
+ALL_OPERATORS = [increase_depth, decrease_depth, change_layer, change_hyperparameters]
+
+
+def select_operator(weights: list = None):
+    op_idx = random.choices(population=range(len(ALL_OPERATORS)), weights=weights, k=1)[0]
+    return ALL_OPERATORS[op_idx], op_idx

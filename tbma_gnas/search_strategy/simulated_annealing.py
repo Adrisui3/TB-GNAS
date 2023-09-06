@@ -4,25 +4,14 @@ import time
 import numpy as np
 from torch_geometric.datasets import Planetoid
 
-from tbma_gnas.evaluation.evaluator import Evaluator
-from tbma_gnas.fuzzy_comparator.fuzzy_comparator import FuzzyComparator, improvement, penalization
-from tbma_gnas.logger.logger import Logger
-from tbma_gnas.search_space.search_space import SearchSpace
-from tbma_gnas.search_strategy.operators import increase_depth, change_layer, decrease_depth, change_hyperparameters
+from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum
+from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
+from tbma_gnas.search_strategy.utils import setup_search
 
 
-def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float,
-                        operators: list = [increase_depth, change_layer, change_hyperparameters, decrease_depth]):
-    logger = Logger()
-    logger.info("Starting simulated annealing with " + str(t_ini) + " initial temperature and " + str(
-        t_end) + " final temperature.")
-    search_space = SearchSpace(num_node_features=dataset.num_node_features, data_out_shape=dataset.num_classes)
-    logger.info("Search Space initialized")
-    evaluator = Evaluator()
-    logger.info("Evaluator initialized. Device: " + evaluator.get_device())
-    comparator = FuzzyComparator()
-    logger.info("Fuzzy comparator initialized.")
-    operator_weights = [1] * len(operators)
+def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float):
+    logger, search_space, evaluator, comparator = setup_search(dataset=dataset)
+    operator_weights = [1] * len(ALL_OPERATORS)
     model_cache = {}
 
     logger.info("Generating and training initial model - STARTING")
@@ -39,16 +28,14 @@ def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float,
     history = [(t_ini, best_acc, best_size)]
     temp = t_ini
     while temp > t_end:
-        logger.info("Temperature " + str(temp))
-        op_idx = random.choices(population=range(len(operators)), weights=operator_weights, k=1)[0]
-        operator = operators[op_idx]
+        logger.info(" --- TEMPERATURE: " + str(temp) + "---")
+        operator, op_idx = select_operator(weights=operator_weights)
         logger.info("Selected operator: " + operator.__name__)
         current_model = operator(search_space, incumbent_model)
         logger.info("New model generated: " + str(current_model.get_blocks()))
 
         try:
             if current_model not in model_cache:
-                logger.info("Unvisited model, evaluating...")
                 current_model, current_acc = evaluator.low_fidelity_estimation(model=current_model,
                                                                                dataset=dataset)
                 model_cache[current_model] = current_acc
@@ -61,30 +48,32 @@ def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float,
 
             acc_label, size_label = comparator.compute_matching_labels(incumbent_size, incumbent_acc, current_size,
                                                                        current_acc)
-            logger.info("Fuzzy labels - Accuracy: " + str(acc_label) + " Size: " + str(size_label))
+            logger.info("Fuzzy labels w.r.t incumbent - Accuracy: " + str(acc_label) + " Size: " + str(size_label))
 
             delta_acc = incumbent_acc - current_acc
             logger.info("Validation accuracy delta: " + str(delta_acc))
-            if improvement(acc_label=acc_label, size_label=size_label):
+            if delta_acc < 0:
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.learn(model=incumbent_model, positive=True)
                 search_space.update_previous_state(model=incumbent_model)
                 operator_weights[op_idx] += 1
                 logger.info("Incumbent updated")
-                if incumbent_acc >= best_acc:
+                acc_label_opt, size_label_opt = comparator.compute_matching_labels(best_size, best_acc, incumbent_size,
+                                                                                   incumbent_acc)
+                logger.info(
+                    "Fuzzy labels w.r.t optimum - Accuracy: " + str(acc_label_opt) + " Size: " + str(size_label_opt))
+                if accept_optimum(acc_label=acc_label_opt, size_label=size_label_opt):
                     best_model, best_acc, best_size = incumbent_model, incumbent_acc, incumbent_size
                     search_space.learn(model=best_model, positive=True)
                     operator_weights[op_idx] += 1
                     history.append((temp, best_acc, best_size))
-                    logger.info("Best model updated")
-            elif delta_acc < 0 and random.uniform(0, 1) < np.exp(-delta_acc / temp):
+                    logger.info("Optimum updated")
+            elif random.uniform(0, 1) < np.exp(-delta_acc / temp):
                 logger.info("Incumbent accepted")
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.update_previous_state(model=incumbent_model)
-            elif penalization(acc_label=acc_label, size_label=size_label):
-                search_space.learn(model=current_model, positive=False)
+            else:
                 operator_weights[op_idx] = max(operator_weights[op_idx] - 1, 1)
-                logger.info("Imposing penalization")
 
         except Exception as exception:
             logger.warning("A model could not be handled: " + str(current_model.get_blocks()))
@@ -104,13 +93,22 @@ pubmed = Planetoid(root='/tmp/PubMed', name='PubMed')
 cora = Planetoid(root='/tmp/Cora', name='Cora')
 dfs = [pubmed]
 
+res = []
 for df in dfs:
-    for _ in range(1):
+    for _ in range(5):
         print("---- DATASET: ", str(df), " ---- ITER: ", _)
-        t_ini = time.time()
-        gnn, acc, hist = simulated_annealing(dataset=df, t_ini=4.92, t_end=0.033, alpha=0.995)
-        print("Runtime: ", time.time() - t_ini)
+        time_ini = time.time()
+        gnn, acc, hist = simulated_annealing(dataset=df, t_ini=4.92, t_end=0.033, alpha=0.99)
+        res.append((gnn, acc, gnn.size()))
+        print("Runtime: ", time.time() - time_ini)
         print("History: ", hist)
         print("Blocks: ", gnn.get_blocks())
         print("Size: ", gnn.size())
         print("Validation accuracy:", acc)
+
+print("Results: ", res)
+print("Best found model: ", max(res, key=lambda x: x[1]))
+accs = [x[1] for x in res]
+sizes = [x[2] for x in res]
+print("Average acc: ", np.mean(accs))
+print("Average size: ", np.mean(sizes))

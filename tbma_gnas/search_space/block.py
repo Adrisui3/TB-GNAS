@@ -1,3 +1,4 @@
+import random
 from typing import Any
 
 from .component_type import ComponentType
@@ -18,11 +19,13 @@ def compute_out_channels(is_output: bool, num_node_features: int, data_out_shape
     heads = params["heads"] if "heads" in params.keys() and concat else 1
     match dim_ratio:
         case DimensionRatio.EQUAL:
-            return prev_out_channels // heads
+            return max(prev_out_channels // heads, data_out_shape)
         case DimensionRatio.REDUCE:
-            return max(prev_out_channels // (2 * heads), data_out_shape)
+            # return max(prev_out_channels // (2 * heads), data_out_shape)
+            return random.randint(data_out_shape, max(prev_out_channels // 2, data_out_shape))
         case DimensionRatio.INCREASE:
-            return min((prev_out_channels * 2) // heads, num_node_features)
+            # return min((prev_out_channels * 2) // heads, num_node_features)
+            return random.randint(prev_out_channels + 1, 2 * prev_out_channels)
 
 
 def fix_heads_output_block(is_output: bool, sampled_params: dict):

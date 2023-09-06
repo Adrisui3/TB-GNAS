@@ -28,19 +28,18 @@ def penalization(acc_label: AccLabel, size_label: SizeLabel) -> bool:
             acc_label == AccLabel.LESS and size_label == SizeLabel.MUCH_BIGGER)
 
 
-def improvement(acc_label: AccLabel, size_label: SizeLabel) -> bool:
+def accept_optimum(acc_label: AccLabel, size_label: SizeLabel) -> bool:
     return (acc_label == AccLabel.EQUAL and size_label == SizeLabel.MUCH_SMALLER) or (
             acc_label == AccLabel.EQUAL and size_label == SizeLabel.SMALLER) or (
-            acc_label == AccLabel.MORE and size_label == SizeLabel.MUCH_SMALLER) or (
-            acc_label == AccLabel.MORE and size_label == SizeLabel.SMALLER) or (
-            acc_label == AccLabel.MORE and size_label == SizeLabel.EQUAL) or (
-            acc_label == AccLabel.MORE and size_label == SizeLabel.BIGGER) or (
-            acc_label == AccLabel.MORE and size_label == SizeLabel.MUCH_BIGGER) or (
-            acc_label == AccLabel.MUCH_MORE and size_label == SizeLabel.MUCH_SMALLER) or (
-            acc_label == AccLabel.MUCH_MORE and size_label == SizeLabel.SMALLER) or (
-            acc_label == AccLabel.MUCH_MORE and size_label == SizeLabel.EQUAL) or (
-            acc_label == AccLabel.MUCH_MORE and size_label == SizeLabel.BIGGER) or (
-            acc_label == AccLabel.MUCH_MORE and size_label == SizeLabel.MUCH_BIGGER)
+            acc_label == AccLabel.MORE and size_label == SizeLabel.MUCH_SMALLER) or acc_label == AccLabel.MORE or acc_label == AccLabel.MUCH_MORE
+
+
+def accept_incumbent(acc_label: AccLabel, size_label: SizeLabel) -> bool:
+    return accept_optimum(acc_label, size_label) or (acc_label == AccLabel.LESS and (
+            (size_label == SizeLabel.MUCH_SMALLER) or (size_label == SizeLabel.SMALLER))) or (
+            acc_label == AccLabel.EQUAL and (
+                (size_label == SizeLabel.BIGGER) or size_label == SizeLabel.MUCH_BIGGER)) or (
+            acc_label == AccLabel.MORE and size_label == SizeLabel.MUCH_BIGGER)
 
 
 class FuzzyComparator:

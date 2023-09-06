@@ -1,27 +1,17 @@
-import random
 import time
 
+import numpy as np
 from torch_geometric.datasets import Planetoid
 
-from tbma_gnas.evaluation.evaluator import Evaluator
-from tbma_gnas.fuzzy_comparator.fuzzy_comparator import FuzzyComparator, improvement, penalization
-from tbma_gnas.logger.logger import Logger
-from tbma_gnas.search_space.search_space import SearchSpace
-from tbma_gnas.search_strategy.operators import increase_depth, change_layer, change_hyperparameters, decrease_depth
+from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum
+from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
+from tbma_gnas.search_strategy.utils import setup_search
 
 
-def local_search(dataset, num_iter: int,
-                 operators: list = [increase_depth, change_layer, change_hyperparameters, decrease_depth]):
-    logger = Logger()
-    logger.info("Starting local search for " + str(num_iter) + " iterations")
-    search_space = SearchSpace(num_node_features=dataset.num_node_features, data_out_shape=dataset.num_classes)
-    logger.info("Search Space initialized")
-    evaluator = Evaluator()
-    logger.info("Evaluator initialized. Device: " + evaluator.get_device())
-    comparator = FuzzyComparator()
-    logger.info("Fuzzy comparator initialized.")
+def local_search(dataset, num_iter: int):
+    logger, search_space, evaluator, comparator = setup_search(dataset=dataset)
     model_cache = {}
-    operator_weights = [num_iter] * len(operators)
+    operator_weights = [1] * len(ALL_OPERATORS)
 
     logger.info("Generating and training initial model - STARTING")
     best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model(), dataset=dataset)
@@ -37,8 +27,7 @@ def local_search(dataset, num_iter: int,
 
     for i in range(num_iter):
         logger.info("Iteration " + str(i))
-        op_idx = random.choices(population=range(len(operators)), weights=operator_weights, k=1)[0]
-        operator = operators[op_idx]
+        operator, op_idx = select_operator(weights=operator_weights)
         logger.info("Selected operator: " + operator.__name__)
         new_model = operator(search_space, best_model)
         logger.info("New model generated: " + str(new_model.get_blocks()))
@@ -59,17 +48,13 @@ def local_search(dataset, num_iter: int,
             acc_label, size_label = comparator.compute_matching_labels(best_size, best_acc, new_size, new_acc)
             logger.info("Fuzzy labels - Accuracy: " + str(acc_label) + " Size: " + str(size_label))
 
-            if improvement(acc_label=acc_label, size_label=size_label):
+            if accept_optimum(acc_label=acc_label, size_label=size_label):
                 best_model, best_acc, best_size = new_model, new_acc, new_size
                 search_space.learn(model=best_model, positive=True)
                 search_space.update_previous_state(model=best_model)
                 operator_weights[op_idx] += 1
                 history.append((i, best_acc, best_size))
                 logger.info("Best model updated")
-            elif penalization(acc_label=acc_label, size_label=size_label):
-                search_space.learn(model=new_model, positive=False)
-                operator_weights[op_idx] = max(operator_weights[op_idx] - 1, 1)
-                logger.info("Imposing penalization")
 
         except Exception as exception:
             logger.warning("A model could not be handled: " + str(new_model.get_blocks()))
@@ -87,16 +72,25 @@ pubmed = Planetoid(root='/tmp/PubMed', name='PubMed')
 cora = Planetoid(root='/tmp/Cora', name='Cora')
 dfs = [pubmed]
 
+res = []
 for df in dfs:
-    for _ in range(1):
+    for _ in range(5):
         print("---- DATASET: ", str(df), " ---- ITER: ", _)
-        t_ini = time.time()
-        gnn, acc, hist = local_search(dataset=df, num_iter=250)
-        print("Runtime: ", time.time() - t_ini)
+        time_ini = time.time()
+        gnn, acc, hist = local_search(dataset=df, num_iter=150)
+        res.append((gnn, acc, gnn.size()))
+        print("Runtime: ", time.time() - time_ini)
         print("History: ", hist)
         print("Blocks: ", gnn.get_blocks())
         print("Size: ", gnn.size())
         print("Validation accuracy:", acc)
+
+print("Results: ", res)
+print("Best found model: ", max(res, key=lambda x: x[1]))
+accs = [x[1] for x in res]
+sizes = [x[2] for x in res]
+print("Average acc: ", np.mean(accs))
+print("Average size: ", np.mean(sizes))
 
 '''
 trans = geom_nn.TransformerConv(in_channels=50, out_channels=20, heads=3, concat=True)
