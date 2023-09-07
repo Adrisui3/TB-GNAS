@@ -1,12 +1,10 @@
 import random
-import time
 
 import numpy as np
-from torch_geometric.datasets import Planetoid
 
 from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum
 from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
-from tbma_gnas.search_strategy.utils import setup_search
+from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
 
 
 def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float):
@@ -51,8 +49,9 @@ def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float):
             logger.info("Fuzzy labels w.r.t incumbent - Accuracy: " + str(acc_label) + " Size: " + str(size_label))
 
             delta_acc = incumbent_acc - current_acc
-            logger.info("Validation accuracy delta: " + str(delta_acc))
-            if delta_acc < 0:
+            delta_size = current_size - incumbent_size
+            logger.info("Deltas - " + "Validation acc: " + str(delta_acc) + " - Size: " + str(delta_size))
+            if delta_acc < 0 and delta_size <= 0:
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.learn(model=incumbent_model, positive=True)
                 search_space.update_previous_state(model=incumbent_model)
@@ -68,7 +67,7 @@ def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float):
                     operator_weights[op_idx] += 1
                     history.append((temp, best_acc, best_size))
                     logger.info("Optimum updated")
-            elif random.uniform(0, 1) < np.exp(-delta_acc / temp):
+            elif random.uniform(0.01, 0.99) < np.exp(-delta_acc / temp) and delta_size < 0:
                 logger.info("Incumbent accepted")
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.update_previous_state(model=incumbent_model)
@@ -76,39 +75,8 @@ def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float):
                 operator_weights[op_idx] = max(operator_weights[op_idx] - 1, 1)
 
         except Exception as exception:
-            logger.warning("A model could not be handled: " + str(current_model.get_blocks()))
-            logger.warning("Size: " + str(current_model.size()))
-            if "shapes cannot be multiplied" in str(exception):
-                logger.error("Reason: " + str(exception))
-                raise
-            else:
-                logger.warning("Reason: " + str(exception))
+            unhandled_model(exception, logger, current_model)
 
         temp = temp * alpha
 
     return best_model, best_acc, history
-
-
-pubmed = Planetoid(root='/tmp/PubMed', name='PubMed')
-cora = Planetoid(root='/tmp/Cora', name='Cora')
-dfs = [pubmed]
-
-res = []
-for df in dfs:
-    for _ in range(5):
-        print("---- DATASET: ", str(df), " ---- ITER: ", _)
-        time_ini = time.time()
-        gnn, acc, hist = simulated_annealing(dataset=df, t_ini=4.92, t_end=0.033, alpha=0.99)
-        res.append((gnn, acc, gnn.size()))
-        print("Runtime: ", time.time() - time_ini)
-        print("History: ", hist)
-        print("Blocks: ", gnn.get_blocks())
-        print("Size: ", gnn.size())
-        print("Validation accuracy:", acc)
-
-print("Results: ", res)
-print("Best found model: ", max(res, key=lambda x: x[1]))
-accs = [x[1] for x in res]
-sizes = [x[2] for x in res]
-print("Average acc: ", np.mean(accs))
-print("Average size: ", np.mean(sizes))

@@ -1,11 +1,7 @@
-import time
-
-import numpy as np
-from torch_geometric.datasets import Planetoid
-
 from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum
+from tbma_gnas.search_space.utils import reset_model_parameters
 from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
-from tbma_gnas.search_strategy.utils import setup_search
+from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
 
 
 def local_search(dataset, num_iter: int):
@@ -57,51 +53,9 @@ def local_search(dataset, num_iter: int):
                 logger.info("Best model updated")
 
         except Exception as exception:
-            logger.warning("A model could not be handled: " + str(new_model.get_blocks()))
-            logger.warning("Size: " + str(new_model.size()))
-            if "shapes cannot be multiplied" in str(exception):
-                logger.error("Reason: " + str(exception))
-                raise
-            else:
-                logger.warning("Reason: " + str(exception))
+            unhandled_model(exception, logger, new_model)
 
-    return best_model, best_acc, history
+    reset_model_parameters(best_model.get_blocks())
+    best_model, test_acc = evaluator.evaluate_in_test(best_model, dataset)
 
-
-pubmed = Planetoid(root='/tmp/PubMed', name='PubMed')
-cora = Planetoid(root='/tmp/Cora', name='Cora')
-dfs = [pubmed]
-
-res = []
-for df in dfs:
-    for _ in range(5):
-        print("---- DATASET: ", str(df), " ---- ITER: ", _)
-        time_ini = time.time()
-        gnn, acc, hist = local_search(dataset=df, num_iter=150)
-        res.append((gnn, acc, gnn.size()))
-        print("Runtime: ", time.time() - time_ini)
-        print("History: ", hist)
-        print("Blocks: ", gnn.get_blocks())
-        print("Size: ", gnn.size())
-        print("Validation accuracy:", acc)
-
-print("Results: ", res)
-print("Best found model: ", max(res, key=lambda x: x[1]))
-accs = [x[1] for x in res]
-sizes = [x[2] for x in res]
-print("Average acc: ", np.mean(accs))
-print("Average size: ", np.mean(sizes))
-
-'''
-trans = geom_nn.TransformerConv(in_channels=50, out_channels=20, heads=3, concat=True)
-print(trans.__dict__)
-'''
-
-'''
---- PubMed ---
-Runtime:  1089.2492578029633
-Blocks:  [(GATv2Conv(500, 500, heads=1), Tanh()), (GATv2Conv(500, 3, heads=1), Sigmoid())]
-Size:  505012
-Validation accuracy: 0.808
-
-'''
+    return best_model, test_acc, history
