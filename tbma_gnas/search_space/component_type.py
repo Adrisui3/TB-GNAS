@@ -17,4 +17,4 @@ class ComponentType(Enum):
                   nn.Tanh.__name__: nn.Tanh,
                   nn.Softplus.__name__: nn.Softplus}
 
-    REGULARIZATION = {}
+    REGULARIZATION = {nn.Dropout.__name__: nn.Dropout}

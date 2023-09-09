@@ -2,25 +2,26 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .block import retrieve_layer_config
+from .block import retrieve_layer_config, get_module_params
 
 
 class HyperModel(torch.nn.Module):
     def __init__(self, model_blocks: list):
         super().__init__()
         self.layers = nn.ModuleList()
-        for layer, activation in model_blocks:
+        for layer, regularization, activation in model_blocks:
             self.layers.append(layer)
+            self.layers.append(regularization)
             self.layers.append(activation)
 
     def get_blocks(self):
-        return [(self.layers[i], self.layers[i + 1]) for i in range(0, len(self.layers) - 1, 2)]
+        return [(self.layers[i], self.layers[i + 1], self.layers[i + 2]) for i in range(0, len(self.layers) - 2, 3)]
 
     def forward(self, x, edge_index):
-        for i in range(0, len(self.layers) - 1, 2):
+        for i in range(0, len(self.layers) - 2, 3):
             x = self.layers[i](x, edge_index)
-            if self.layers[i + 1]:
-                x = self.layers[i + 1](x)
+            x = self.layers[i + 1](x)
+            x = self.layers[i + 2](x)
 
         return F.log_softmax(x, dim=1)
 
@@ -33,7 +34,11 @@ class HyperModel(torch.nn.Module):
             config, _ = retrieve_layer_config(bl[0])
             config["in_channels"] = bl[0].in_channels
             config["out_channels"] = bl[0].out_channels
-            to_hash.append(tuple([bl[0].__class__.__name__, tuple(sorted(config.items())), bl[1].__class__.__name__]))
+
+            reg_config = get_module_params(bl[1])
+
+            to_hash.append(tuple([bl[0].__class__.__name__, tuple(sorted(config.items())), bl[1].__class__.__name__,
+                                  tuple(sorted(reg_config.items())), bl[2]]))
 
         to_hash = tuple(to_hash)
         return hash(frozenset(to_hash))

@@ -49,11 +49,15 @@ def update_for_cheb_conv(prev_params: dict, layer):
         prev_params["K"] = len(layer.__dict__["_modules"]["lins"])
 
 
+def get_module_params(module) -> dict:
+    return {key: module.__dict__[key] for key in module.__dict__.keys() if
+            key in DEFAULT_HYPERPARAMETERS[module.__class__.__name__].keys()}
+
+
 def retrieve_layer_config(layer):
     # Given a layer, it retrieves the set of parameters and values which are considered for optimization.
     # It is worth noting that the complete set of parameters of the layer might be bigger.
-    prev_params = {key: layer.__dict__[key] for key in layer.__dict__.keys() if
-                   key in DEFAULT_HYPERPARAMETERS[layer.__class__.__name__].keys()}
+    prev_params = get_module_params(layer)
 
     update_for_cheb_conv(prev_params, layer)
 

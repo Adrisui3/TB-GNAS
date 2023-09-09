@@ -4,10 +4,10 @@ from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
 from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
 
 
-def local_search(dataset, num_iter: int):
-    logger, search_space, evaluator, comparator = setup_search(dataset=dataset)
+def local_search(dataset, num_iter: int, max_depth: int = None):
+    logger, search_space, evaluator, comparator = setup_search(dataset=dataset, max_depth=max_depth)
     model_cache = {}
-    operator_weights = [1] * len(ALL_OPERATORS)
+    operator_weights = [num_iter] * len(ALL_OPERATORS)
 
     logger.info("Generating and training initial model - STARTING")
     best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model(), dataset=dataset)

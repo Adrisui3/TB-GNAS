@@ -22,21 +22,22 @@ def compute_prev_out_shape(prev_layer):
 
 
 class SearchSpace:
-    def __init__(self, num_node_features: int, data_out_shape: int):
+    def __init__(self, num_node_features: int, data_out_shape: int, max_depth: int):
         self.data_out_shape = data_out_shape
         self.num_node_features = num_node_features
+        self.max_depth = max_depth
         self.space = {1: [LearnableBlock(is_input=True, is_output=True)]}
         self.lock = Lock()
 
     def get_init_model(self) -> HyperModel:
-        return HyperModel(
-            [(geom_nn.GraphConv(in_channels=self.num_node_features, out_channels=self.data_out_shape), nn.ReLU())])
+        return HyperModel([(geom_nn.GraphConv(in_channels=self.num_node_features, out_channels=self.data_out_shape),
+                            nn.Dropout(p=0.0), nn.ReLU())])
 
     def learn(self, model: HyperModel, positive: bool):
         with self.lock:
             depth = len(model.get_blocks())
-            for lay_act, block in zip(model.get_blocks(), self.space[depth]):
-                block.learn(layer=lay_act[0], activation=lay_act[1], positive=positive)
+            for mod_block, block in zip(model.get_blocks(), self.space[depth]):
+                block.learn(layer=mod_block[0], regularization=mod_block[1], activation=mod_block[2], positive=positive)
 
     def update_previous_state(self, model: HyperModel):
         with self.lock:
@@ -72,6 +73,9 @@ class SearchSpace:
     def increase_model_depth(self, model: HyperModel) -> HyperModel:
         blocks = model.get_blocks()
         new_depth = len(blocks) + 1
+
+        if self.max_depth and new_depth > self.max_depth:
+            return model
 
         self._extend_search_space(new_depth)
 
@@ -138,7 +142,7 @@ class SearchSpace:
                                                                      num_node_features=self.num_node_features,
                                                                      data_out_shape=self.data_out_shape)
             else:
-                new_block = self.space[model_depth][block_idx].query_hyperparameters_for_layer(blocks[block_idx][0])
+                new_block = self.space[model_depth][block_idx].query_hyperparameters_for_block(blocks[block_idx])
 
             # Update the block
             blocks[block_idx] = new_block

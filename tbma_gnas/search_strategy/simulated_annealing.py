@@ -7,8 +7,8 @@ from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
 from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
 
 
-def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float):
-    logger, search_space, evaluator, comparator = setup_search(dataset=dataset)
+def simulated_annealing(dataset, t_ini: float, t_end: float, alpha: float, max_depth: int = None):
+    logger, search_space, evaluator, comparator = setup_search(dataset=dataset, max_depth=max_depth)
     operator_weights = [1] * len(ALL_OPERATORS)
     model_cache = {}
 

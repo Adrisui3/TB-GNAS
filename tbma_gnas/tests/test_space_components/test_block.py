@@ -13,5 +13,5 @@ class TestBlock:
         block = LearnableBlock()
         layer, act = block.query(prev_out_shape=10, num_node_features=25, data_out_shape=5)
 
-        block.learn(layer=layer, activation=act, positive=True)
+        block.learn(layer=layer, activation=act, positive=True, reg=None)
         assert any(score > 1 for score in block.layer.get_scores().values())

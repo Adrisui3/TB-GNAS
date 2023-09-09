@@ -16,7 +16,16 @@ class HyperParameters:
                                     in
                                     self.specific_parameters[layer].keys()}
 
+    def query_for_module(self, module: str) -> dict:
+        return {param_name: self.specific_parameters[module][param_name].query() for param_name
+                in
+                self.specific_parameters[module].keys()}
+
     def learn_for_layer(self, layer: str, prev_values: dict, prev_ratio: DimensionRatio, positive: bool) -> None:
         self.ratio.learn(prev_ratio, positive)
         for param_name, prev_value in prev_values.items():
             self.specific_parameters[layer][param_name].learn(prev_value, positive)
+
+    def learn_for_module(self, module: str, prev_values: dict, positive: bool):
+        for param_name, prev_value in prev_values.items():
+            self.specific_parameters[module][param_name].learn(prev_value, positive)
