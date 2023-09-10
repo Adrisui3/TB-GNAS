@@ -40,6 +40,11 @@ def accept_incumbent(acc_label: AccLabel, size_label: SizeLabel) -> bool:
             acc_label == AccLabel.MORE and size_label == SizeLabel.MUCH_BIGGER)
 
 
+def redemption(acc_label: AccLabel, size_label: SizeLabel) -> bool:
+    return acc_label == AccLabel.LESS and ((size_label == SizeLabel.EQUAL) or (size_label == SizeLabel.SMALLER) or (
+            size_label == SizeLabel.MUCH_SMALLER))
+
+
 class FuzzyComparator:
     ACCURACY_INTERVALS = [-0.1, -0.05, -0.1, -0.05, -0.02, 0.00, -0.01, 0.00, 0.00, 0.01, 0.00, 0.03, 0.05, 0.1, 0.05,
                           0.1]

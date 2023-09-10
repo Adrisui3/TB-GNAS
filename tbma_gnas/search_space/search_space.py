@@ -31,13 +31,13 @@ class SearchSpace:
 
     def get_init_model(self) -> HyperModel:
         return HyperModel([(geom_nn.GraphConv(in_channels=self.num_node_features, out_channels=self.data_out_shape),
-                            nn.Dropout(p=0.0), nn.ReLU())])
+                            nn.ReLU(), nn.Dropout(p=0.0))])
 
     def learn(self, model: HyperModel, positive: bool):
         with self.lock:
             depth = len(model.get_blocks())
             for mod_block, block in zip(model.get_blocks(), self.space[depth]):
-                block.learn(layer=mod_block[0], regularization=mod_block[1], activation=mod_block[2], positive=positive)
+                block.learn(layer=mod_block[0], regularization=mod_block[2], activation=mod_block[1], positive=positive)
 
     def update_previous_state(self, model: HyperModel):
         with self.lock:

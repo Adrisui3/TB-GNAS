@@ -1,0 +1,58 @@
+---- DATASET: PubMed()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GATv2Conv(500, 188, heads=2)
+    (1): ELU(alpha=1.0)
+    (2): Dropout(p=0.5, inplace=False)
+    (3): GraphConv(188, 3)
+    (4): Tanh()
+    (5): Dropout(p=0.35, inplace=False)
+  )
+), 0.791, 378447, 217.39609050750732)
+Average acc:  0.7624666666666666
+Average size:  138815.23333333334
+Average runtime:  99.54640627702078
+---- DATASET: Cora()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GCNConv(1433, 269)
+    (1): ReLU()
+    (2): Dropout(p=0.5, inplace=False)
+    (3): GraphConv(269, 7)
+    (4): Tanh()
+    (5): Dropout(p=0.45, inplace=False)
+  )
+), 0.808, 389512, 47.72725486755371)
+Average acc:  0.7841333333333336
+Average size:  563659.9
+Average runtime:  49.259224422772725
+
+--- LOCAL SEARCH ---
+---- DATASET: PubMed()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 220)
+    (1): Tanh()
+    (2): Dropout(p=0.6, inplace=False)
+    (3): ChebConv(220, 3, K=2, normalization=sym)
+    (4): Sigmoid()
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.783, 221543, 111.7788188457489)
+Average acc:  0.7592000000000002
+Average size:  128612.26666666666
+Average runtime:  88.28920031388601
+---- DATASET: Cora()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(1433, 34)
+    (1): Sigmoid()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GCNConv(34, 7)
+    (4): ELU(alpha=1.0)
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.811, 97723, 42.230977058410645)
+Average acc:  0.7856333333333334
+Average size:  485609.1
+Average runtime:  40.54682807922363

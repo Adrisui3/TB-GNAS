@@ -12,10 +12,10 @@ dfs = [pubmed, cora, citeseer]
 
 for df in dfs:
     res = []
-    for _ in range(10):
+    for _ in range(30):
         print("---- DATASET: ", str(df), " ---- ITER: ", _)
         time_ini = time.time()
-        gnn, acc, hist = local_search(dataset=df, num_iter=150, max_depth=2)
+        gnn, acc, hist = local_search(dataset=df, num_iters=150, max_depth=2)
         time_end = time.time()
         runtime = time_end - time_ini
         res.append((gnn, acc, gnn.size(), runtime))
@@ -25,10 +25,10 @@ for df in dfs:
         print("Size: ", gnn.size())
         print("Test accuracy:", acc)
 
-    with open("./tbma_gnas/results/ls_baseline_models_" + str(df) + ".txt", "a") as f:
+    with open("./tbma_gnas/results/sa_30_baseline_models_" + str(df) + ".txt", "a") as f:
         print("Results: ", res, file=f)
 
-    with open("./tbma_gnas/results/ls_baseline_summary.txt", "a") as f:
+    with open("./tbma_gnas/results/sa_30_baseline_summary.txt", "a") as f:
         print("---- DATASET: " + str(df) + "----", file=f)
         print("Best found model: ", max(res, key=lambda x: x[1]), file=f)
         accs = [x[1] for x in res]

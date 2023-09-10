@@ -9,10 +9,10 @@ class HyperModel(torch.nn.Module):
     def __init__(self, model_blocks: list):
         super().__init__()
         self.layers = nn.ModuleList()
-        for layer, regularization, activation in model_blocks:
+        for layer, activation, regularization in model_blocks:
             self.layers.append(layer)
-            self.layers.append(regularization)
             self.layers.append(activation)
+            self.layers.append(regularization)
 
     def get_blocks(self):
         return [(self.layers[i], self.layers[i + 1], self.layers[i + 2]) for i in range(0, len(self.layers) - 2, 3)]
@@ -35,10 +35,10 @@ class HyperModel(torch.nn.Module):
             config["in_channels"] = bl[0].in_channels
             config["out_channels"] = bl[0].out_channels
 
-            reg_config = get_module_params(bl[1])
+            reg_config = get_module_params(bl[2])
 
             to_hash.append(tuple([bl[0].__class__.__name__, tuple(sorted(config.items())), bl[1].__class__.__name__,
-                                  tuple(sorted(reg_config.items())), bl[2]]))
+                                  bl[2].__class__.__name__, tuple(sorted(reg_config.items()))]))
 
         to_hash = tuple(to_hash)
         return hash(frozenset(to_hash))

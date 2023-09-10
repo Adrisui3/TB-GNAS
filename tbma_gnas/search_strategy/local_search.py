@@ -4,10 +4,10 @@ from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
 from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
 
 
-def local_search(dataset, num_iter: int, max_depth: int = None):
+def local_search(dataset, num_iters: int, max_depth: int = None):
     logger, search_space, evaluator, comparator = setup_search(dataset=dataset, max_depth=max_depth)
     model_cache = {}
-    operator_weights = [num_iter] * len(ALL_OPERATORS)
+    operator_weights = [num_iters] * len(ALL_OPERATORS)
 
     logger.info("Generating and training initial model - STARTING")
     best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model(), dataset=dataset)
@@ -20,9 +20,11 @@ def local_search(dataset, num_iter: int, max_depth: int = None):
     logger.info("Initial model size: " + str(best_size))
 
     history = [(0, best_acc, best_size)]
+    explored_models = 0
+    failed_models = 0
 
-    for i in range(num_iter):
-        logger.info("Iteration " + str(i))
+    while explored_models < num_iters:
+        logger.info(" --- ITERATION: " + str(explored_models) + " ---")
         operator, op_idx = select_operator(weights=operator_weights)
         logger.info("Selected operator: " + operator.__name__)
         new_model = operator(search_space, best_model)
@@ -49,13 +51,21 @@ def local_search(dataset, num_iter: int, max_depth: int = None):
                 search_space.learn(model=best_model, positive=True)
                 search_space.update_previous_state(model=best_model)
                 operator_weights[op_idx] += 1
-                history.append((i, best_acc, best_size))
+                history.append((explored_models, best_acc, best_size))
                 logger.info("Best model updated")
+
+            explored_models += 1
+            failed_models = 0
 
         except Exception as exception:
             unhandled_model(exception, logger, new_model)
+            failed_models += 1
+            if failed_models > num_iters:
+                raise
 
+    logger.info("Evaluating model in test set...")
     reset_model_parameters(best_model.get_blocks())
     best_model, test_acc = evaluator.evaluate_in_test(best_model, dataset)
+    logger.info("Test set accuracy: " + str(test_acc))
 
     return best_model, test_acc, history

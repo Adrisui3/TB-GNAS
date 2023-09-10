@@ -53,10 +53,12 @@ class LearnableBlock:
         self.prev_in_channels = None
         self.prev_out_channels = None
         self.prev_layer_hyperparameters = None
-        self.prev_reg = None
-        self.prev_reg_hyperparameters = None
+
         self.prev_act = None
         self.prev_act_hyperparameters = None
+
+        self.prev_reg = None
+        self.prev_reg_hyperparameters = None
 
     def get_input(self):
         return self.is_input
@@ -87,25 +89,25 @@ class LearnableBlock:
         prev_hyperparams, _ = retrieve_layer_config(block[0])
         self.prev_layer_hyperparameters = prev_hyperparams
 
-        self.prev_reg = self.regularization.get_components()[block[1].__class__.__name__]
-        self.prev_reg_hyperparameters = get_module_params(block[1])
+        self.prev_act = self.activation.get_components()[block[1].__class__.__name__]
 
-        self.prev_act = self.activation.get_components()[block[2].__class__.__name__]
+        self.prev_reg = self.regularization.get_components()[block[2].__class__.__name__]
+        self.prev_reg_hyperparameters = get_module_params(block[2])
 
     def rebuild_block(self, new_in_channels: int = None, new_out_channels: int = None, new_params: dict = None) -> \
             tuple[Any, Any, Any]:
         in_channels = new_in_channels if new_in_channels else self.prev_in_channels
         out_channels = new_out_channels if new_out_channels else self.prev_out_channels
         params = new_params if new_params else self.prev_layer_hyperparameters
-        return self.prev_layer(in_channels=in_channels, out_channels=out_channels, **params), self.prev_reg(
-            **self.prev_reg_hyperparameters), self.prev_act()
+        return self.prev_layer(in_channels=in_channels, out_channels=out_channels,
+                               **params), self.prev_act(), self.prev_reg(**self.prev_reg_hyperparameters)
 
-    def query_hyperparameters_for_block(self, layer) -> tuple[Any, Any, Any]:
-        _, new_params = self.layer_hyperparameters.query_for_layer(layer[0].__class__.__name__)
+    def query_hyperparameters_for_block(self, block) -> tuple[Any, Any, Any]:
+        _, new_params = self.layer_hyperparameters.query_for_layer(block[0].__class__.__name__)
         fix_heads_output_block(self.is_output, new_params)
-        new_reg_params = self.regularization_hyperparameters.query_for_module(layer[1].__class__.__name__)
+        new_reg_params = self.regularization_hyperparameters.query_for_module(block[2].__class__.__name__)
         return self.prev_layer(in_channels=self.prev_in_channels, out_channels=self.prev_out_channels,
-                               **new_params), self.prev_reg(**new_reg_params), self.prev_act()
+                               **new_params), self.prev_act(), self.prev_reg(**new_reg_params)
 
     def query_dimension_ratio_for_layer(self, layer) -> DimensionRatio:
         dim_ratio, _ = self.layer_hyperparameters.query_for_layer(layer.__class__.__name__)
@@ -129,5 +131,5 @@ class LearnableBlock:
         init_reg = self.regularization.query()
         reg_params = self.regularization_hyperparameters.query_for_module(init_reg.__name__)
 
-        return init_layer(in_channels=prev_out_shape, out_channels=out_channels, **params), init_reg(
-            **reg_params), init_act()
+        return init_layer(in_channels=prev_out_shape, out_channels=out_channels, **params), init_act(), init_reg(
+            **reg_params)
