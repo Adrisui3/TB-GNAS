@@ -25,10 +25,10 @@ for df in dfs:
         print("Size: ", gnn.size())
         print("Test accuracy:", acc)
 
-    with open("./tbma_gnas/results/sa_30_baseline_models_" + str(df) + ".txt", "a") as f:
+    with open("./tbma_gnas/results/ls_150_baseline_models_" + str(df) + ".txt", "a") as f:
         print("Results: ", res, file=f)
 
-    with open("./tbma_gnas/results/sa_30_baseline_summary.txt", "a") as f:
+    with open("./tbma_gnas/results/ls_150_baseline_summary.txt", "a") as f:
         print("---- DATASET: " + str(df) + "----", file=f)
         print("Best found model: ", max(res, key=lambda x: x[1]), file=f)
         accs = [x[1] for x in res]

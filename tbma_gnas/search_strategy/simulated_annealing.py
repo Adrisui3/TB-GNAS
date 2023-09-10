@@ -67,7 +67,7 @@ def simulated_annealing(dataset, num_iters: int, max_depth: int = None):
                     history.append((explored_models, best_val_acc, best_size))
                     logger.info("Optimum updated")
             elif redemption(acc_label=acc_label, size_label=size_label) and random.uniform(0, 1) < (
-                    num_iters - i) / num_iters:
+                    num_iters - explored_models) / num_iters:
                 logger.info("Incumbent accepted")
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.update_previous_state(model=incumbent_model)
