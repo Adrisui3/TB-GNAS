@@ -35,8 +35,7 @@ def simulated_annealing(dataset, num_iters: int, max_depth: int = None):
 
         try:
             if current_model not in model_cache:
-                current_model, current_acc = evaluator.low_fidelity_estimation(model=current_model,
-                                                                               dataset=dataset)
+                current_model, current_acc = evaluator.low_fidelity_estimation(model=current_model, dataset=dataset)
                 model_cache[current_model] = current_acc
             else:
                 logger.info("Cached model, skipping evaluation...")

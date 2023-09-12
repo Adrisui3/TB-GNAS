@@ -33,8 +33,7 @@ def local_search(dataset, num_iters: int, max_depth: int = None):
         try:
             if new_model not in model_cache:
                 logger.info("Unvisited model, evaluating...")
-                new_model, new_acc = evaluator.low_fidelity_estimation(model=new_model,
-                                                                       dataset=dataset)
+                new_model, new_acc = evaluator.low_fidelity_estimation(model=new_model, dataset=dataset)
                 model_cache[new_model] = new_acc
             else:
                 logger.info("Cached model, skipping evaluation...")

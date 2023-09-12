@@ -1,0 +1,28 @@
+---- DATASET: PubMed()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): TransformerConv(500, 53, heads=1)
+    (1): ELU(alpha=1.0)
+    (2): Dropout(p=0.5, inplace=False)
+    (3): GraphConv(53, 3)
+    (4): ELU(alpha=1.0)
+    (5): Dropout(p=0.45, inplace=False)
+  )
+), 0.782, 106533, 142.1608772277832)
+Average acc:  0.7431666666666668
+Average size:  135579.46666666667
+Average runtime:  111.35307592550913
+---- DATASET: Cora()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(1433, 546)
+    (1): Sigmoid()
+    (2): Dropout(p=0.6, inplace=False)
+    (3): GCNConv(546, 7)
+    (4): Sigmoid()
+    (5): Dropout(p=0.35, inplace=False)
+  )
+), 0.82, 1569211, 35.538458585739136)
+Average acc:  0.7767999999999999
+Average size:  571016.1
+Average runtime:  38.162679425875346

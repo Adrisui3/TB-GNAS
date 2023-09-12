@@ -2,6 +2,8 @@ import torch
 from sklearn.metrics import accuracy_score
 from torch.nn import CrossEntropyLoss
 
+from tbma_gnas.evaluation.early_stop import EarlyStop
+from tbma_gnas.logger.logger import Logger
 from tbma_gnas.search_space.hypermodel import HyperModel
 
 
@@ -17,39 +19,45 @@ def train_one_epoch(optimizer, criterion, model: HyperModel, data):
 
 class Evaluator:
     LOW_FIDELITY_EPOCHS = 25
+    LOW_FIDELITY_PATIENCE = 5
+
+    TRAINING_PATIENCE = 7
     TRAINING_EPOCHS = 100
 
-    def __init__(self):
+    def __init__(self, logger: Logger):
+        self.logger = logger
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def get_device(self) -> str:
         return str(self.device)
 
-    def low_fidelity_estimation(self, model: HyperModel, dataset, verbose: bool = False):
-        return self.train(model, dataset, self.LOW_FIDELITY_EPOCHS, verbose=verbose)
+    def low_fidelity_estimation(self, model: HyperModel, dataset):
+        return self.train(model, dataset, self.LOW_FIDELITY_EPOCHS, self.LOW_FIDELITY_PATIENCE)
 
-    def evaluate_in_test(self, model: HyperModel, dataset, verbose: bool = False):
-        return self.train(model, dataset, self.TRAINING_EPOCHS, validation=False, verbose=verbose)
+    def evaluate_in_test(self, model: HyperModel, dataset):
+        return self.train(model, dataset, self.TRAINING_EPOCHS, self.TRAINING_PATIENCE, validation=False)
 
-    # TODO: Improve this estimation by using early stopping and modularize iterations as shown in https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
-    def train(self, model: HyperModel, dataset, epochs: int, validation: bool = True, verbose: bool = False):
+    def train(self, model: HyperModel, dataset, epochs: int, patience: int, validation: bool = True):
         data = dataset[0].to(self.device)
         model.to(self.device)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
         criterion = CrossEntropyLoss()
+        early_stop = EarlyStop(patience=patience)
 
         model.train()
         for epoch in range(epochs):
-            loss = train_one_epoch(optimizer, criterion, model, data)
-            if verbose:
-                print("Epoch:", epoch, "--- Loss:", loss.item())
+            _ = train_one_epoch(optimizer, criterion, model, data)
+            with torch.no_grad():
+                model.eval()
+                preds = model(data.x, data.edge_index)
+                val_acc = accuracy_score(data.y[data.val_mask].cpu(), preds[data.val_mask].argmax(dim=1).cpu())
 
-        with torch.no_grad():
-            model.eval()
-            preds = model(data.x, data.edge_index)
+            if early_stop.early_stop(val_acc):
+                self.logger.info("Early stopping at epoch " + str(epoch))
+                break
 
         if validation:
-            acc = accuracy_score(data.y[data.val_mask].cpu(), preds[data.val_mask].argmax(dim=1).cpu())
+            acc = val_acc
         else:
             acc = accuracy_score(data.y[data.test_mask].cpu(), preds[data.test_mask].argmax(dim=1).cpu())
 
