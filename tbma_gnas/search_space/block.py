@@ -8,8 +8,8 @@ from .space_component import LearnableSpaceComponent
 from .utils import retrieve_layer_config, get_module_params
 
 
-def compute_out_channels(is_output: bool, num_node_features: int, data_out_shape: int, prev_out_channels: int,
-                         dim_ratio: DimensionRatio, params: dict) -> int:
+def compute_out_channels(is_output: bool, data_out_shape: int, prev_out_channels: int, dim_ratio: DimensionRatio,
+                         params: dict) -> int:
     # If the DimensionRatio is set to EQUAL, then the block will keep the input shape and the output shape equals,
     # on the other hand, if it's set to REDUCE, it will reduce the dimension to a half.
     if is_output:
@@ -102,18 +102,21 @@ class LearnableBlock:
         return self.prev_layer(in_channels=in_channels, out_channels=out_channels,
                                **params), self.prev_act(), self.prev_reg(**self.prev_reg_hyperparameters)
 
-    def query_hyperparameters_for_block(self, block) -> tuple[Any, Any, Any]:
-        _, new_params = self.layer_hyperparameters.query_for_layer(block[0].__class__.__name__)
+    def query_hyperparameters_for_block(self, block, data_out_shape: int, prev_block_out_shape: int) -> tuple[
+        Any, Any, Any]:
+        new_dim_ratio, new_params = self.layer_hyperparameters.query_for_layer(block[0].__class__.__name__)
         fix_heads_output_block(self.is_output, new_params)
         new_reg_params = self.regularization_hyperparameters.query_for_module(block[2].__class__.__name__)
-        return self.prev_layer(in_channels=self.prev_in_channels, out_channels=self.prev_out_channels,
+        new_out_channels = compute_out_channels(self.is_output, data_out_shape, prev_block_out_shape, new_dim_ratio,
+                                                new_params)
+        return self.prev_layer(in_channels=self.prev_in_channels, out_channels=new_out_channels,
                                **new_params), self.prev_act(), self.prev_reg(**new_reg_params)
 
     def query_dimension_ratio_for_layer(self, layer) -> DimensionRatio:
         dim_ratio, _ = self.layer_hyperparameters.query_for_layer(layer.__class__.__name__)
         return dim_ratio
 
-    def query(self, prev_out_shape: int, num_node_features: int, data_out_shape: int) -> tuple[Any, Any, Any]:
+    def query(self, prev_out_shape: int, data_out_shape: int) -> tuple[Any, Any, Any]:
         # Query every component individually: layer, parameters and activation function
         init_layer = self.layer.query()
         dim_ratio, params = self.layer_hyperparameters.query_for_layer(init_layer.__name__)
@@ -122,9 +125,7 @@ class LearnableBlock:
         fix_heads_output_block(self.is_output, params)
 
         # Compute the output shape
-        out_channels = compute_out_channels(self.is_output, num_node_features, data_out_shape, prev_out_shape,
-                                            dim_ratio,
-                                            params)
+        out_channels = compute_out_channels(self.is_output, data_out_shape, prev_out_shape, dim_ratio, params)
 
         init_act = self.activation.query()
 
