@@ -37,13 +37,32 @@ def compute_prev_block_concat(block_idx: int, blocks: list) -> bool:
     return False
 
 
+def compute_layer_out_shape(layer):
+    block_heads = get_heads_from_layer(layer)
+    block_concat = get_concat_from_layer(layer)
+    return block_heads * layer.out_channels if block_concat else layer.out_channels
+
+
+def update_for_cheb_conv(prev_params: dict, layer):
+    # This is a workaround used to retrieve parameter K for ChebConv since it's not stored as usual
+    if "K" in DEFAULT_HYPERPARAMETERS[layer.__class__.__name__].keys() and "K" not in prev_params:
+        prev_params["K"] = len(layer.__dict__["_modules"]["lins"])
+
+
+def get_module_params(module) -> dict:
+    return {key: module.__dict__[key] for key in module.__dict__.keys() if
+            key in DEFAULT_HYPERPARAMETERS[module.__class__.__name__].keys()}
+
+
 def retrieve_layer_config(layer):
     # Given a layer, it retrieves the set of parameters and values which are considered for optimization.
     # It is worth noting that the complete set of parameters of the layer might be bigger.
-    prev_params = {key: layer.__dict__[key] for key in layer.__dict__.keys() if
-                   key in DEFAULT_HYPERPARAMETERS[layer.__class__.__name__].keys()}
+    prev_params = get_module_params(layer)
 
-    heads_param = prev_params["heads"] if "heads" in prev_params.keys() else 1
+    update_for_cheb_conv(prev_params, layer)
+
+    concat_param = prev_params["concat"] if "concat" in prev_params.keys() else False
+    heads_param = prev_params["heads"] if "heads" in prev_params.keys() and concat_param else 1
     out_shape = layer.out_channels * heads_param
     if layer.in_channels == out_shape:
         prev_ratio = DimensionRatio.EQUAL

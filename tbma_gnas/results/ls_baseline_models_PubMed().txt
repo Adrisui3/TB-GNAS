@@ -1,0 +1,88 @@
+Results:  [(HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 75)
+    (1): Dropout(p=0.45, inplace=False)
+    (2): ReLU()
+    (3): GCNConv(75, 3)
+    (4): Dropout(p=0.6, inplace=False)
+    (5): Tanh()
+  )
+), 0.757, 75303, 57.28717565536499), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 107)
+    (1): Dropout(p=0.35, inplace=False)
+    (2): Tanh()
+    (3): TransformerConv(107, 3, heads=3)
+    (4): Dropout(p=0.0, inplace=False)
+    (5): Tanh()
+  )
+), 0.78, 110347, 60.419782400131226), (HyperModel(
+  (layers): ModuleList(
+    (0): GCNConv(500, 217)
+    (1): Dropout(p=0.35, inplace=False)
+    (2): Tanh()
+    (3): GATv2Conv(217, 3, heads=5)
+    (4): Dropout(p=0.5, inplace=False)
+    (5): ELU(alpha=1.0)
+  )
+), 0.767, 115275, 70.80657196044922), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 72)
+    (1): Dropout(p=0.6, inplace=False)
+    (2): Tanh()
+    (3): GATv2Conv(72, 3, heads=3)
+    (4): Dropout(p=0.35, inplace=False)
+    (5): Tanh()
+  )
+), 0.712, 73398, 93.03307938575745), (HyperModel(
+  (layers): ModuleList(
+    (0): GATv2Conv(500, 159, heads=2)
+    (1): Dropout(p=0.45, inplace=False)
+    (2): ELU(alpha=1.0)
+    (3): ChebConv(159, 3, K=2, normalization=rw)
+    (4): Dropout(p=0.45, inplace=False)
+    (5): Tanh()
+  )
+), 0.757, 320070, 249.4783115386963), (HyperModel(
+  (layers): ModuleList(
+    (0): GCNConv(500, 693)
+    (1): Dropout(p=0.5, inplace=False)
+    (2): Tanh()
+    (3): GCNConv(693, 3)
+    (4): Dropout(p=0.35, inplace=False)
+    (5): Softplus(beta=1, threshold=20)
+  )
+), 0.769, 349275, 112.88617753982544), (HyperModel(
+  (layers): ModuleList(
+    (0): GCNConv(500, 239)
+    (1): Dropout(p=0.6, inplace=False)
+    (2): ELU(alpha=1.0)
+    (3): GATv2Conv(239, 3, heads=2)
+    (4): Dropout(p=0.35, inplace=False)
+    (5): Sigmoid()
+  )
+), 0.762, 122628, 52.0993173122406), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 127)
+    (1): Dropout(p=0.35, inplace=False)
+    (2): Softplus(beta=1, threshold=20)
+    (3): GATv2Conv(127, 3, heads=1)
+    (4): Dropout(p=0.0, inplace=False)
+    (5): Tanh()
+  )
+), 0.758, 127901, 46.93721389770508), (HyperModel(
+  (layers): ModuleList(
+    (0): GATv2Conv(500, 99, heads=2)
+    (1): Dropout(p=0.35, inplace=False)
+    (2): ELU(alpha=1.0)
+    (3): GraphConv(99, 3)
+    (4): Dropout(p=0.0, inplace=False)
+    (5): ReLU()
+  )
+), 0.763, 199287, 125.12107539176941), (HyperModel(
+  (layers): ModuleList(
+    (0): GATv2Conv(500, 3, heads=1)
+    (1): Dropout(p=0.35, inplace=False)
+    (2): Softplus(beta=1, threshold=20)
+  )
+), 0.729, 3012, 45.3127338886261)]
