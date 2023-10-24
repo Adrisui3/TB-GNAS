@@ -5,9 +5,9 @@ from torch_geometric.datasets import Planetoid
 def load_datasets():
     pubmed = Planetoid(root='./experiments/datasets/PubMed', name='PubMed')
     cora = Planetoid(root='./experiments/datasets/Cora', name='Cora')
-    # citeseer = Planetoid(root='/tmp/Citeseer', name='Citeseer')
+    citeseer = Planetoid(root='./experiments/datasets/Citeseer', name='Citeseer')
 
-    return [pubmed, cora]
+    return [pubmed, cora, citeseer]
 
 
 def trim_results(res):
