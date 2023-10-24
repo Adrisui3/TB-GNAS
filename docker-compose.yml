@@ -2,12 +2,10 @@ version: '3.8'
 
 services:
   gnas:
-    image: tbma-gnas:latest
+    image: tbma_gnas:latest
     command: bash
     tty: true
     stdin_open: true
-    volumes:
-      - ./tbma_gnas:/tbma_gnas
     deploy:
       resources:
         reservations:

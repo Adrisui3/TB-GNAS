@@ -3,8 +3,8 @@ from torch_geometric.datasets import Planetoid
 
 
 def load_datasets():
-    pubmed = Planetoid(root='/tmp/PubMed', name='PubMed')
-    cora = Planetoid(root='/tmp/Cora', name='Cora')
+    pubmed = Planetoid(root='./experiments/datasets/PubMed', name='PubMed')
+    cora = Planetoid(root='./experiments/datasets/Cora', name='Cora')
     # citeseer = Planetoid(root='/tmp/Citeseer', name='Citeseer')
 
     return [pubmed, cora]
