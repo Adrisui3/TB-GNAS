@@ -1,17 +1,18 @@
 from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum
 from tbma_gnas.search_space.utils import reset_model_parameters
 from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
-from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
+from tbma_gnas.search_strategy.utils import setup_search, unhandled_model, objective_function
 
 
 def local_search(dataset, num_iters: int, max_depth: int = None):
-    logger, search_space, evaluator, comparator = setup_search(dataset=dataset, max_depth=max_depth)
+    logger, search_space, evaluator, _ = setup_search(dataset=dataset, max_depth=max_depth, fuzzy=False)
     model_cache = {}
     operator_weights = [num_iters] * len(ALL_OPERATORS)
 
     logger.info("Generating and training initial model - STARTING")
     best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model(), dataset=dataset)
     best_size = best_model.size()
+    best_objective = objective_function(best_acc, best_size)
     search_space.update_previous_state(model=best_model)
     model_cache[best_model] = best_acc
     logger.info("Generating and training initial model - DONE")
@@ -42,11 +43,13 @@ def local_search(dataset, num_iters: int, max_depth: int = None):
             new_size = new_model.size()
             logger.info("Validation accuracy: " + str(new_acc) + " - Size: " + str(new_size))
 
-            acc_label, size_label = comparator.compute_matching_labels(best_size, best_acc, new_size, new_acc)
-            logger.info("Fuzzy labels - Accuracy: " + str(acc_label) + " Size: " + str(size_label))
+            new_objective = objective_function(new_acc, new_size)
+            logger.info("Best model objective function: " + str(best_objective))
+            logger.info("New model objective function: " + str(new_objective))
 
-            if accept_optimum(acc_label=acc_label, size_label=size_label):
+            if best_objective < new_objective:
                 best_model, best_acc, best_size = new_model, new_acc, new_size
+                best_objective = new_objective
                 search_space.learn(model=best_model, positive=True)
                 search_space.update_previous_state(model=best_model)
                 operator_weights[op_idx] += 1

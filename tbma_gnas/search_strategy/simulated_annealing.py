@@ -3,11 +3,11 @@ import random
 from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum, accept_incumbent, redemption
 from tbma_gnas.search_space.utils import reset_model_parameters
 from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
-from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
+from tbma_gnas.search_strategy.utils import setup_search, unhandled_model, objective_function
 
 
 def simulated_annealing(dataset, num_iters: int, max_depth: int = None):
-    logger, search_space, evaluator, comparator = setup_search(dataset=dataset, max_depth=max_depth)
+    logger, search_space, evaluator, _ = setup_search(dataset=dataset, max_depth=max_depth, fuzzy=False)
     operator_weights = [1] * len(ALL_OPERATORS)
     model_cache = {}
 
@@ -15,6 +15,8 @@ def simulated_annealing(dataset, num_iters: int, max_depth: int = None):
     best_model, best_val_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model(), dataset=dataset)
     best_size = best_model.size()
     incumbent_model, incumbent_acc, incumbent_size = best_model, best_val_acc, best_size
+    best_objective = objective_function(best_val_acc, best_size)
+    incumbent_objective = best_objective
     search_space.update_previous_state(model=best_model)
     model_cache[best_model] = best_val_acc
     logger.info("Generating and training initial model - DONE")
@@ -44,29 +46,28 @@ def simulated_annealing(dataset, num_iters: int, max_depth: int = None):
             current_size = current_model.size()
             logger.info("Validation accuracy: " + str(current_acc) + " - Size: " + str(current_size))
 
-            acc_label, size_label = comparator.compute_matching_labels(incumbent_size, incumbent_acc, current_size,
-                                                                       current_acc)
-            logger.info("Fuzzy labels w.r.t incumbent - Accuracy: " + str(acc_label) + " Size: " + str(size_label))
+            current_objective = objective_function(current_acc, current_size)
+            logger.info("Best model objective function: " + str(best_objective))
+            logger.info("Incumbent model objective function: " + str(incumbent_objective))
+            logger.info("New model objective function: " + str(current_objective))
 
-            if accept_incumbent(acc_label=acc_label, size_label=size_label):
+            delta = incumbent_objective - current_objective
+            if delta < 0:
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
+                incumbent_objective = current_objective
                 search_space.learn(model=incumbent_model, positive=True)
                 search_space.update_previous_state(model=incumbent_model)
                 operator_weights[op_idx] += 1
                 logger.info("Incumbent updated")
-                acc_label_opt, size_label_opt = comparator.compute_matching_labels(best_size, best_val_acc,
-                                                                                   incumbent_size,
-                                                                                   incumbent_acc)
-                logger.info(
-                    "Fuzzy labels w.r.t optimum - Accuracy: " + str(acc_label_opt) + " Size: " + str(size_label_opt))
-                if accept_optimum(acc_label=acc_label_opt, size_label=size_label_opt):
+                if best_objective < current_objective:
                     best_model, best_val_acc, best_size = incumbent_model, incumbent_acc, incumbent_size
+                    best_objective = current_objective
                     search_space.learn(model=best_model, positive=True)
                     operator_weights[op_idx] += 1
                     history.append((explored_models, best_val_acc, best_size))
                     logger.info("Optimum updated")
-            elif redemption(acc_label=acc_label, size_label=size_label) and random.uniform(0, 1) < (
-                    num_iters - explored_models) / num_iters:
+            # TODO: Define based on temperature
+            elif redemption(acc_label=acc_label, size_label=size_label) and random.uniform(0, 1) < (num_iters - explored_models) / num_iters:
                 logger.info("Incumbent accepted")
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.update_previous_state(model=incumbent_model)
