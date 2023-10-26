@@ -1,4 +1,5 @@
-from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum
+import numpy as np
+
 from tbma_gnas.search_space.utils import reset_model_parameters
 from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
 from tbma_gnas.search_strategy.utils import setup_search, unhandled_model, objective_function
@@ -20,6 +21,7 @@ def local_search(dataset, num_iters: int, max_depth: int = None):
     logger.info("Initial validation accuracy: " + str(best_acc))
     logger.info("Initial model size: " + str(best_size))
 
+    deltas = []
     history = [(0, best_acc, best_size)]
     explored_models = 0
     failed_models = 0
@@ -46,6 +48,8 @@ def local_search(dataset, num_iters: int, max_depth: int = None):
             new_objective = objective_function(new_acc, new_size)
             logger.info("Best model objective function: " + str(best_objective))
             logger.info("New model objective function: " + str(new_objective))
+            logger.info("Delta: " + str(best_objective - new_objective))
+            deltas.append(best_objective - new_objective)
 
             if best_objective < new_objective:
                 best_model, best_acc, best_size = new_model, new_acc, new_size
@@ -65,6 +69,9 @@ def local_search(dataset, num_iters: int, max_depth: int = None):
             if failed_models > num_iters:
                 raise
 
+    logger.info("Delta max: " + str(np.max(deltas)))
+    logger.info("Delta min: " + str(np.min(deltas)))
+    logger.info("Delta avg: " + str(np.mean(deltas)))
     logger.info("Evaluating model in test set...")
     reset_model_parameters(best_model.get_blocks())
     best_model, test_acc = evaluator.evaluate_in_test(best_model, dataset)

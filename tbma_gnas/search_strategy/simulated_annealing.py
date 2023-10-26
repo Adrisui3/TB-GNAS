@@ -1,12 +1,14 @@
 import random
 
-from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum, accept_incumbent, redemption
+import numpy as np
+
 from tbma_gnas.search_space.utils import reset_model_parameters
 from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
 from tbma_gnas.search_strategy.utils import setup_search, unhandled_model, objective_function
 
 
-def simulated_annealing(dataset, num_iters: int, max_depth: int = None):
+def simulated_annealing(dataset, t_ini: float = 3.076e-3, t_end: float = 5.0071e-5, alpha: float = 0.97275,
+                        max_depth: int = None):
     logger, search_space, evaluator, _ = setup_search(dataset=dataset, max_depth=max_depth, fuzzy=False)
     operator_weights = [1] * len(ALL_OPERATORS)
     model_cache = {}
@@ -28,7 +30,8 @@ def simulated_annealing(dataset, num_iters: int, max_depth: int = None):
     explored_models = 0
     failed_models = 0
 
-    while explored_models < num_iters:
+    temp = t_ini
+    while temp > t_end:
         logger.info(" --- ITERATION: " + str(explored_models) + " ---")
         operator, op_idx = select_operator(weights=operator_weights)
         logger.info("Selected operator: " + operator.__name__)
@@ -66,19 +69,19 @@ def simulated_annealing(dataset, num_iters: int, max_depth: int = None):
                     operator_weights[op_idx] += 1
                     history.append((explored_models, best_val_acc, best_size))
                     logger.info("Optimum updated")
-            # TODO: Define based on temperature
-            elif redemption(acc_label=acc_label, size_label=size_label) and random.uniform(0, 1) < (num_iters - explored_models) / num_iters:
+            elif random.uniform(0, 1) < np.exp(-delta / temp):
                 logger.info("Incumbent accepted")
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.update_previous_state(model=incumbent_model)
 
             explored_models += 1
             failed_models = 0
+            temp = temp * alpha
 
         except Exception as exception:
             unhandled_model(exception, logger, current_model)
             failed_models += 1
-            if failed_models > num_iters:
+            if failed_models > 150:
                 raise
 
     logger.info("Evaluating model in test set...")

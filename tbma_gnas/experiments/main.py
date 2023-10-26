@@ -3,10 +3,11 @@ from datetime import datetime
 
 import numpy as np
 
-from tbma_gnas.experiments.utils import load_datasets, trim_results
+from tbma_gnas.experiments.utils import load_datasets, trim_results, PARAMS_PER_DATASET
 from tbma_gnas.search_strategy.fuzzy_local_search import fuzzy_local_search
-from tbma_gnas.search_strategy.local_search import local_search
 from tbma_gnas.search_strategy.fuzzy_simulated_annealing import fuzzy_simulated_annealing
+from tbma_gnas.search_strategy.local_search import local_search
+from tbma_gnas.search_strategy.simulated_annealing import simulated_annealing
 
 RESULTS_PATH = "./tbma_gnas/results/"
 RUNS = 32
@@ -14,15 +15,16 @@ RUNS = 32
 if __name__ == "__main__":
     dfs = load_datasets()
 
-    for alg in [local_search]:
+    for alg in [local_search, simulated_annealing, fuzzy_local_search, fuzzy_simulated_annealing]:
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%m-%d-%Y_%H:%M:%S")
         for df in dfs:
             res = []
+            params = PARAMS_PER_DATASET[df.name][alg.__name__]
             for _ in range(RUNS):
                 print("---- DATASET: ", df.name, " ---- ITER: ", _)
                 time_ini = time.time()
-                gnn, acc, hist = alg(dataset=df, num_iters=150, max_depth=2)
+                gnn, acc, hist = alg(dataset=df, **params)
                 time_end = time.time()
                 runtime = time_end - time_ini
                 res.append((gnn, acc, gnn.size(), runtime, hist))
