@@ -13,4 +13,4 @@ RUN git clone https://github.com/Adrisui3/TBMA-GNAS.git
 
 WORKDIR TBMA-GNAS/
 
-CMD ["bash"]
+CMD ["python3", "-m", "tbma_gnas.experiments.main"]
