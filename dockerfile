@@ -1,5 +1,8 @@
 FROM python:3.11.4
 
+RUN export OPENBLAS_NUM_THREADS = 1
+RUN export OMP_NUM_THREADS = 1
+
 RUN pip3 install --upgrade pip
 RUN pip3 install --no-cache-dir torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1
 RUN pip3 install --no-cache-dir torch-geometric
