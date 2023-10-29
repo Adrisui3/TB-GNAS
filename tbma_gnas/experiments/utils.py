@@ -40,6 +40,26 @@ PARAMS_PER_DATASET = {"PubMed":
                 "t_end": 2.15e-5,
                 "alpha": 0.99205,
                 "max_depth": 2
+            }},
+    "Citeseer":
+        {"fuzzy_local_search": {
+            "num_iters": 150,
+            "max_depth": 2,
+        },
+            "fuzzy_simulated_annealing": {
+                "num_iters": 150,
+                "max_depth": 2
+            },
+            "local_search": {
+                "num_iters": 150,
+                "max_depth": 2
+
+            },
+            "simulated_annealing": {
+                "t_ini": 3.076e-3,
+                "t_end": 5.0071e-5,
+                "alpha": 0.97275,
+                "max_depth": 2
             }}
 }
 
