@@ -1,0 +1,280 @@
+Results:  [(HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 101)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): ChebConv(101, 3, K=4, normalization=sym)
+    (4): Softplus(beta=1, threshold=20)
+    (5): Dropout(p=0.35, inplace=False)
+  )
+), 0.778, 102316, 40.85945510864258, [(0, 0.714, 3003), (0, 0.732, 102316), (3, 0.748, 101710), (5, 0.776, 102316), (53, 0.796, 102316)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 97)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GATv2Conv(97, 3, heads=3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.35, inplace=False)
+  )
+), 0.743, 98873, 26.853997945785522, [(0, 0.722, 3003), (0, 0.758, 6234), (1, 0.752, 6054), (8, 0.76, 999963), (9, 0.77, 97691), (20, 0.782, 98585), (97, 0.792, 101828), (109, 0.786, 98873)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 122)
+    (1): Tanh()
+    (2): Dropout(p=0.25, inplace=False)
+    (3): TransformerConv(122, 3, heads=1)
+    (4): ELU(alpha=1.0)
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.744, 123476, 34.80366802215576, [(0, 0.726, 3003), (4, 0.734, 3000), (6, 0.78, 201355), (8, 0.79, 180915), (28, 0.798, 187323), (29, 0.794, 101625), (49, 0.794, 97260), (53, 0.788, 91182), (58, 0.802, 123476)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 132)
+    (1): ReLU()
+    (2): Dropout(p=0.45, inplace=False)
+    (3): GCNConv(132, 3)
+    (4): Softplus(beta=1, threshold=20)
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.747, 132531, 38.33722281455994, [(0, 0.55, 3003), (1, 0.766, 174239), (28, 0.78, 172691), (45, 0.784, 132531)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 24)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GraphConv(24, 3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.0, inplace=False)
+  )
+), 0.76, 24171, 30.272154569625854, [(0, 0.712, 3003), (6, 0.764, 24171), (9, 0.782, 24168), (39, 0.794, 24168), (69, 0.802, 24171)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GATConv(500, 3, heads=3)
+    (1): Sigmoid()
+    (2): Dropout(p=0.6, inplace=False)
+  )
+), 0.757, 4521, 23.062391996383667, [(0, 0.722, 3003), (1, 0.76, 3015), (14, 0.778, 10545), (57, 0.788, 4521)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 52)
+    (1): Sigmoid()
+    (2): Dropout(p=0.6, inplace=False)
+    (3): GCNConv(52, 3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.0, inplace=False)
+  )
+), 0.771, 52211, 24.13362717628479, [(0, 0.542, 3003), (1, 0.772, 214859), (4, 0.79, 501503), (44, 0.798, 502003), (63, 0.8, 52211)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 21)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): TransformerConv(21, 3, heads=4)
+    (4): Tanh()
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.748, 21879, 30.477909564971924, [(0, 0.724, 3003), (3, 0.77, 22473), (8, 0.79, 21681), (10, 0.8, 21879)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 500)
+    (1): ReLU()
+    (2): Dropout(p=0.25, inplace=False)
+    (3): GCNConv(500, 3)
+    (4): Tanh()
+    (5): Dropout(p=0.6, inplace=False)
+  )
+), 0.774, 501503, 34.7818865776062, [(0, 0.712, 3003), (2, 0.756, 35143), (3, 0.796, 35143), (65, 0.808, 501503)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 93)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GCNConv(93, 3)
+    (4): ELU(alpha=1.0)
+    (5): Dropout(p=0.35, inplace=False)
+  )
+), 0.774, 93282, 32.17153573036194, [(0, 0.722, 3003), (3, 0.784, 215863), (63, 0.778, 204819), (65, 0.8, 204819), (90, 0.804, 93282)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 45)
+    (1): ReLU()
+    (2): Dropout(p=0.35, inplace=False)
+    (3): GraphConv(45, 3)
+    (4): Softplus(beta=1, threshold=20)
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.77, 45270, 35.46320915222168, [(0, 0.732, 3003), (6, 0.756, 48796), (12, 0.79, 518557), (23, 0.784, 46677), (43, 0.782, 45270), (45, 0.8, 45270)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 140)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GCNConv(140, 3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.5, inplace=False)
+  )
+), 0.768, 140563, 27.496447563171387, [(0, 0.722, 3003), (0, 0.772, 35143), (4, 0.788, 501503), (24, 0.798, 501503), (42, 0.798, 211636), (139, 0.804, 140563)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 45)
+    (1): Sigmoid()
+    (2): Dropout(p=0.25, inplace=False)
+    (3): GraphConv(45, 3)
+    (4): Softplus(beta=1, threshold=20)
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.771, 45318, 32.071370124816895, [(0, 0.714, 3003), (7, 0.726, 3000), (14, 0.802, 45318)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GCNConv(500, 3)
+    (1): Sigmoid()
+    (2): Dropout(p=0.6, inplace=False)
+  )
+), 0.74, 1503, 12.791075468063354, [(0, 0.728, 3003), (6, 0.736, 1503), (9, 0.774, 1503)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 123)
+    (1): ReLU()
+    (2): Dropout(p=0.5, inplace=False)
+    (3): GCNConv(123, 3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.6, inplace=False)
+  )
+), 0.751, 123495, 32.34715414047241, [(0, 0.708, 3003), (0, 0.724, 3000), (6, 0.782, 123495), (45, 0.79, 123495), (130, 0.798, 123495)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GCNConv(500, 114)
+    (1): Tanh()
+    (2): Dropout(p=0.6, inplace=False)
+    (3): GraphConv(114, 3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.5, inplace=False)
+  )
+), 0.773, 57801, 25.44489622116089, [(0, 0.714, 3003), (1, 0.782, 130293), (21, 0.798, 129903), (39, 0.798, 125878), (74, 0.806, 125875), (102, 0.804, 57801)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 209)
+    (1): ReLU()
+    (2): Dropout(p=0.45, inplace=False)
+    (3): GraphConv(209, 3)
+    (4): ELU(alpha=1.0)
+    (5): Dropout(p=0.0, inplace=False)
+  )
+), 0.766, 210466, 42.00887370109558, [(0, 0.71, 3003), (1, 0.76, 46463), (9, 0.794, 46322), (69, 0.802, 655560), (105, 0.802, 503003), (136, 0.796, 210466)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GATConv(500, 156, heads=1)
+    (1): ReLU()
+    (2): Dropout(p=0.25, inplace=False)
+    (3): GCNConv(156, 3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.726, 78939, 44.58175802230835, [(0, 0.728, 3003), (2, 0.74, 7533), (4, 0.788, 550569), (18, 0.79, 397215), (29, 0.79, 110817), (46, 0.802, 110817), (77, 0.806, 78939)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 500)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GraphConv(500, 3)
+    (4): Softplus(beta=1, threshold=20)
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.768, 503503, 33.07798671722412, [(0, 0.724, 3003), (0, 0.762, 14482), (4, 0.772, 14101), (12, 0.782, 777407), (15, 0.79, 97682), (19, 0.788, 38231), (108, 0.806, 503503)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 166)
+    (1): ReLU()
+    (2): Dropout(p=0.25, inplace=False)
+    (3): TransformerConv(166, 3, heads=1)
+    (4): Tanh()
+    (5): Dropout(p=0.35, inplace=False)
+  )
+), 0.76, 168170, 35.25331997871399, [(0, 0.724, 3003), (6, 0.736, 3003), (8, 0.768, 127048), (21, 0.786, 120559), (23, 0.78, 28376), (24, 0.798, 168170)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GCNConv(500, 86)
+    (1): ReLU()
+    (2): Dropout(p=0.25, inplace=False)
+    (3): GraphConv(86, 3)
+    (4): ReLU()
+    (5): Dropout(p=0.35, inplace=False)
+  )
+), 0.18, 43605, 16.2693989276886, [(0, 0.546, 3003), (1, 0.706, 1503), (2, 0.718, 1503), (9, 0.728, 1503), (16, 0.746, 106473), (18, 0.772, 106470), (40, 0.786, 106980), (41, 0.784, 52731), (43, 0.792, 43605)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 72)
+    (1): ReLU()
+    (2): Dropout(p=0.5, inplace=False)
+    (3): ChebConv(72, 3, K=4, normalization=sym)
+    (4): ELU(alpha=1.0)
+    (5): Dropout(p=0.35, inplace=False)
+  )
+), 0.78, 72939, 32.319616079330444, [(0, 0.714, 3003), (1, 0.784, 95537), (83, 0.8, 95225), (98, 0.796, 72939)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GATv2Conv(500, 3, heads=8)
+    (1): Sigmoid()
+    (2): Dropout(p=0.0, inplace=False)
+  )
+), 0.744, 24075, 27.389359951019287, [(0, 0.53, 3003), (0, 0.71, 24075), (6, 0.734, 3012), (12, 0.754, 3012), (82, 0.762, 24075), (87, 0.76, 21066), (108, 0.758, 15048), (113, 0.766, 24075)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 62)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): ChebConv(62, 3, K=2, normalization=sym)
+    (4): Tanh()
+    (5): Dropout(p=0.0, inplace=False)
+  )
+), 0.785, 62437, 44.27753472328186, [(0, 0.722, 3003), (0, 0.772, 70913), (15, 0.802, 70493), (40, 0.8, 33234), (58, 0.808, 62437)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 61)
+    (1): ReLU()
+    (2): Dropout(p=0.45, inplace=False)
+    (3): GraphConv(61, 3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.45, inplace=False)
+  )
+), 0.77, 61366, 26.931909561157227, [(0, 0.718, 3003), (1, 0.782, 67472), (24, 0.8, 61369), (114, 0.808, 61366)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 7)
+    (1): ReLU()
+    (2): Dropout(p=0.6, inplace=False)
+    (3): GCNConv(7, 3)
+    (4): Softplus(beta=1, threshold=20)
+    (5): Dropout(p=0.35, inplace=False)
+  )
+), 0.745, 7031, 33.542505979537964, [(0, 0.708, 3003), (11, 0.762, 140871), (17, 0.782, 876388), (18, 0.794, 843526), (69, 0.788, 27084), (101, 0.784, 7031)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 51)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GATConv(51, 3, heads=6)
+    (4): Sigmoid()
+    (5): Dropout(p=0.0, inplace=False)
+  )
+), 0.771, 52008, 25.19482398033142, [(0, 0.726, 3003), (2, 0.786, 56084), (113, 0.788, 52008), (123, 0.796, 52008)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 106)
+    (1): ReLU()
+    (2): Dropout(p=0.6, inplace=False)
+    (3): TransformerConv(106, 3, heads=2)
+    (4): Sigmoid()
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.772, 108247, 26.6978816986084, [(0, 0.718, 3003), (6, 0.728, 3003), (27, 0.798, 224959), (63, 0.792, 221179), (78, 0.79, 160721), (88, 0.792, 56131), (99, 0.802, 112099), (107, 0.806, 108247)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(500, 14)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GraphConv(14, 3)
+    (4): ELU(alpha=1.0)
+    (5): Dropout(p=0.45, inplace=False)
+  )
+), 0.76, 14098, 40.73565125465393, [(0, 0.732, 3003), (3, 0.796, 14098)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GCNConv(500, 92)
+    (1): Tanh()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GraphConv(92, 3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.25, inplace=False)
+  )
+), 0.773, 46647, 33.14380407333374, [(0, 0.72, 3003), (1, 0.784, 219529), (3, 0.79, 131789), (5, 0.8, 131789), (68, 0.804, 114801), (141, 0.802, 46647)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GATv2Conv(500, 108, heads=7)
+    (1): Tanh()
+    (2): Dropout(p=0.45, inplace=False)
+    (3): GCNConv(108, 3)
+    (4): Softplus(beta=1, threshold=20)
+    (5): Dropout(p=0.6, inplace=False)
+  )
+), 0.794, 758703, 46.5288724899292, [(0, 0.724, 3003), (5, 0.77, 108435), (10, 0.776, 22091), (121, 0.796, 758703)]), (HyperModel(
+  (layers): ModuleList(
+    (0): GATv2Conv(500, 201, heads=4)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GraphConv(201, 3)
+    (4): ELU(alpha=1.0)
+    (5): Dropout(p=0.45, inplace=False)
+  )
+), 0.789, 807822, 103.6854419708252, [(0, 0.73, 3003), (2, 0.786, 155078), (8, 0.796, 503503), (51, 0.814, 2007753), (62, 0.814, 948487), (82, 0.812, 807822)])]
