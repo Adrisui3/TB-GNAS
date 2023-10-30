@@ -14,7 +14,7 @@ from tbma_gnas.search_strategy.local_search import local_search
 from tbma_gnas.search_strategy.simulated_annealing import simulated_annealing
 
 RESULTS_PATH = "./tbma_gnas/results/"
-RUNS = 3
+RUNS = 32
 
 if __name__ == "__main__":
     dfs = load_datasets()
