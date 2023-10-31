@@ -36,9 +36,9 @@ PARAMS_PER_DATASET = {"PubMed":
 
             },
             "simulated_annealing": {
-                "t_ini": 7.10e-5,
-                "t_end": 2.15e-5,
-                "alpha": 0.99205,
+                "t_ini": 0.0004430253154047865,
+                "t_end": 8.345205017383352e-06,
+                "alpha": 0.9737,
                 "max_depth": 2
             }},
     "Citeseer":
@@ -56,9 +56,9 @@ PARAMS_PER_DATASET = {"PubMed":
 
             },
             "simulated_annealing": {
-                "t_ini": 3.076e-3,
-                "t_end": 5.0071e-5,
-                "alpha": 0.97275,
+                "t_ini": 0.00017228762265741697,
+                "t_end": 2.8373697059103396e-06,
+                "alpha": 0.97285,
                 "max_depth": 2
             }}
 }
