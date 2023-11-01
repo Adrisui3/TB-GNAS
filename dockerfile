@@ -8,8 +8,8 @@ RUN pip3 install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_c
 RUN pip3 install --no-cache-dir pytest
 
 RUN apt update && apt install -y git
+RUN git clone https://github.com/Adrisui3/TBMA-GNAS.git
 
-COPY clone_and_run.sh clone_and_run.sh
-RUN chmod +x clone_and_run.sh
+WORKDIR TBMA-GNAS/
 
-CMD ["./clone_and_run.sh"]
+CMD ["python3", "-m", "tbma_gnas.experiments.main"]
