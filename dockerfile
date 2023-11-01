@@ -10,5 +10,6 @@ RUN pip3 install --no-cache-dir pytest
 RUN apt update && apt install -y git
 
 COPY clone_and_run.sh clone_and_run.sh
+RUN chmod +x clone_and_run.sh
 
 CMD ["./clone_and_run.sh"]
