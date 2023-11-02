@@ -19,47 +19,78 @@ class AccLabel(Enum):
     MUCH_MORE = 5
 
 
-def penalization(acc_label: AccLabel, size_label: SizeLabel) -> bool:
-    return (acc_label == AccLabel.EQUAL and size_label == SizeLabel.MUCH_BIGGER) or (
-            acc_label == AccLabel.MUCH_LESS and size_label == SizeLabel.EQUAL) or (
-            acc_label == AccLabel.MUCH_LESS and size_label == SizeLabel.BIGGER) or (
-            acc_label == AccLabel.MUCH_LESS and size_label == SizeLabel.MUCH_BIGGER) or (
-            acc_label == AccLabel.LESS and size_label == SizeLabel.BIGGER) or (
-            acc_label == AccLabel.LESS and size_label == SizeLabel.MUCH_BIGGER)
-
-
-def accept_optimum(acc_label: AccLabel, size_label: SizeLabel) -> bool:
-    return (acc_label == AccLabel.EQUAL and size_label == SizeLabel.MUCH_SMALLER) or (
-            acc_label == AccLabel.EQUAL and size_label == SizeLabel.SMALLER) or (
-            acc_label == AccLabel.MORE and size_label == SizeLabel.MUCH_SMALLER) or acc_label == AccLabel.MORE or acc_label == AccLabel.MUCH_MORE
-
-
-def accept_incumbent(acc_label: AccLabel, size_label: SizeLabel) -> bool:
-    return accept_optimum(acc_label, size_label) or (acc_label == AccLabel.EQUAL and (
-            (size_label == SizeLabel.BIGGER) or size_label == SizeLabel.MUCH_BIGGER)) or (
-            acc_label == AccLabel.MORE and size_label == SizeLabel.MUCH_BIGGER)
-
-
-def redemption(acc_label: AccLabel, size_label: SizeLabel) -> bool:
-    return acc_label == AccLabel.LESS and ((size_label == SizeLabel.EQUAL) or (size_label == SizeLabel.SMALLER) or (
-            size_label == SizeLabel.MUCH_SMALLER))
+class RuleConsequent(Enum):
+    NEW_BEST = 1
+    NEW_INCUMBENT = 2
+    REDEMPTION = 3
+    REJECT = 4
 
 
 class FuzzyComparator:
-    ACCURACY_INTERVALS = [-0.1, -0.05, -0.1, -0.05, -0.02, 0.00, -0.01, 0.00, 0.00, 0.01, 0.00, 0.03, 0.05, 0.1, 0.05, 0.1]
-    SIZE_INTERVALS = [-0.15, -0.1, -0.15, -0.1, -0.05, 0.00, -0.025, 0.00, 0.00, 0.015, 0.00, 0.025, 0.05, 0.1, 0.05, 0.1]
+    ACCURACY_LABELS = [-0.1, -0.05, -0.1, -0.05, -0.02, 0.00, -0.01, 0.00, 0.00, 0.01, 0.00, 0.03, 0.05, 0.1, 0.05, 0.1]
+
+    SIZE_LABELS = [-0.15, -0.1, -0.15, -0.1, -0.05, 0.00, -0.025, 0.00, 0.00, 0.015, 0.00, 0.025, 0.05, 0.1, 0.05, 0.1]
+
+    RULE_SET = {
+        AccLabel.MUCH_LESS: {
+            SizeLabel.MUCH_SMALLER: RuleConsequent.REJECT,
+            SizeLabel.SMALLER: RuleConsequent.REJECT,
+            SizeLabel.EQUAL: RuleConsequent.REJECT,
+            SizeLabel.BIGGER: RuleConsequent.REJECT,
+            SizeLabel.MUCH_BIGGER: RuleConsequent.REJECT
+        },
+
+        AccLabel.LESS: {
+            SizeLabel.MUCH_SMALLER: RuleConsequent.REDEMPTION,
+            SizeLabel.SMALLER: RuleConsequent.REDEMPTION,
+            SizeLabel.EQUAL: RuleConsequent.REJECT,
+            SizeLabel.BIGGER: RuleConsequent.REJECT,
+            SizeLabel.MUCH_BIGGER: RuleConsequent.REJECT
+        },
+
+        AccLabel.EQUAL: {
+            SizeLabel.MUCH_SMALLER: RuleConsequent.NEW_BEST,
+            SizeLabel.SMALLER: RuleConsequent.NEW_BEST,
+            SizeLabel.EQUAL: RuleConsequent.NEW_BEST,
+            SizeLabel.BIGGER: RuleConsequent.NEW_INCUMBENT,
+            SizeLabel.MUCH_BIGGER: RuleConsequent.NEW_INCUMBENT
+        },
+
+        AccLabel.MORE: {
+            SizeLabel.MUCH_SMALLER: RuleConsequent.NEW_BEST,
+            SizeLabel.SMALLER: RuleConsequent.NEW_BEST,
+            SizeLabel.EQUAL: RuleConsequent.NEW_BEST,
+            SizeLabel.BIGGER: RuleConsequent.NEW_BEST,
+            SizeLabel.MUCH_BIGGER: RuleConsequent.NEW_BEST
+        },
+
+        AccLabel.MUCH_MORE: {
+            SizeLabel.MUCH_SMALLER: RuleConsequent.NEW_BEST,
+            SizeLabel.SMALLER: RuleConsequent.NEW_BEST,
+            SizeLabel.EQUAL: RuleConsequent.NEW_BEST,
+            SizeLabel.BIGGER: RuleConsequent.NEW_BEST,
+            SizeLabel.MUCH_BIGGER: RuleConsequent.NEW_BEST
+        }
+    }
 
     def __init__(self):
         self.acc_variable = FuzzyVariable(
             labels=[AccLabel.MUCH_LESS, AccLabel.LESS, AccLabel.EQUAL, AccLabel.MORE, AccLabel.MUCH_MORE],
-            abcdefgh=self.ACCURACY_INTERVALS)
+            abcdefgh=self.ACCURACY_LABELS)
         self.size_variable = FuzzyVariable(
             labels=[SizeLabel.MUCH_SMALLER, SizeLabel.SMALLER, SizeLabel.EQUAL, SizeLabel.BIGGER,
                     SizeLabel.MUCH_BIGGER],
-            abcdefgh=self.SIZE_INTERVALS)
+            abcdefgh=self.SIZE_LABELS)
 
-    def compute_matching_labels(self, ref_size: int, ref_val_acc: float, cand_size: int, cand_val_acc: float) -> tuple:
-        acc_label = self.acc_variable.compute_matching_label(x=cand_val_acc - ref_val_acc)
-        size_label = self.size_variable.compute_matching_label(x=(cand_size / ref_size) - 1)
+    def compute_fired_rules(self, ref_size: int, ref_val_acc: float, cand_size: int, cand_val_acc: float) -> tuple:
+        acc_labels = self.acc_variable.compute_matching_labels(x=cand_val_acc - ref_val_acc)
+        size_labels = self.size_variable.compute_matching_labels(x=(cand_size / ref_size) - 1)
 
-        return acc_label, size_label
+        fired_rules = []
+        for acc in acc_labels:
+            for size in size_labels:
+                consequent = self.RULE_SET[acc[0]][size[0]]
+                weight = min(acc[1], size[1])
+                fired_rules.append((consequent, weight))
+
+        return max(fired_rules, key=lambda tup: tup[1])

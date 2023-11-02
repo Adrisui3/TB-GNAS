@@ -1,6 +1,6 @@
 import random
 
-from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum, accept_incumbent, redemption
+from tbma_gnas.fuzzy_comparator.fuzzy_comparator import RuleConsequent
 from tbma_gnas.search_space.utils import reset_model_parameters
 from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
 from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
@@ -44,29 +44,25 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
             current_size = current_model.size()
             logger.info("Validation accuracy: " + str(current_acc) + " - Size: " + str(current_size))
 
-            acc_label, size_label = comparator.compute_matching_labels(incumbent_size, incumbent_acc, current_size,
+            rule_consequent_incumbent = comparator.compute_fired_rules(incumbent_size, incumbent_acc, current_size,
                                                                        current_acc)
-            logger.info("Fuzzy labels w.r.t incumbent - Accuracy: " + str(acc_label) + " Size: " + str(size_label))
+            logger.info("Fired rule w.r.t incumbent - " + str(rule_consequent_incumbent[0]) + " - " + str(rule_consequent_incumbent[1]))
 
-            if accept_incumbent(acc_label=acc_label, size_label=size_label):
+            if rule_consequent_incumbent[0] == RuleConsequent.NEW_INCUMBENT or rule_consequent_incumbent[0] == RuleConsequent.NEW_BEST:
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.learn(model=incumbent_model, positive=True)
                 search_space.update_previous_state(model=incumbent_model)
                 operator_weights[op_idx] += 1
                 logger.info("Incumbent updated")
-                acc_label_opt, size_label_opt = comparator.compute_matching_labels(best_size, best_val_acc,
-                                                                                   incumbent_size,
-                                                                                   incumbent_acc)
-                logger.info(
-                    "Fuzzy labels w.r.t optimum - Accuracy: " + str(acc_label_opt) + " Size: " + str(size_label_opt))
-                if accept_optimum(acc_label=acc_label_opt, size_label=size_label_opt):
+                rule_consequent_optimum = comparator.compute_fired_rules(best_size, best_val_acc, incumbent_size,incumbent_acc)
+                logger.info("Fired rule w.r.t optimum - " + str(rule_consequent_optimum[0]) + " - " + str(rule_consequent_optimum[1]))
+                if rule_consequent_optimum[0] == RuleConsequent.NEW_BEST:
                     best_model, best_val_acc, best_size = incumbent_model, incumbent_acc, incumbent_size
                     search_space.learn(model=best_model, positive=True)
                     operator_weights[op_idx] += 1
                     history.append((explored_models, best_val_acc, best_size))
                     logger.info("Optimum updated")
-            elif redemption(acc_label=acc_label, size_label=size_label) and random.uniform(0, 1) < (
-                    num_iters - explored_models) / num_iters:
+            elif rule_consequent_incumbent[0] == RuleConsequent.REDEMPTION and random.uniform(0, 1) < (num_iters - explored_models) / num_iters:
                 logger.info("Incumbent accepted")
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.update_previous_state(model=incumbent_model)

@@ -18,7 +18,7 @@ def train_one_epoch(optimizer, criterion, model: HyperModel, data):
 
 
 class Evaluator:
-    LOW_FIDELITY_EPOCHS = 50
+    LOW_FIDELITY_EPOCHS = 25
     LOW_FIDELITY_PATIENCE = 5
 
     TRAINING_PATIENCE = 7

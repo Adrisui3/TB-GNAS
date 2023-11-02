@@ -1,3 +1,5 @@
+from typing import Any, List
+
 import numpy as np
 import skfuzzy as fuzz
 
@@ -11,10 +13,10 @@ class FuzzyVariable:
                        [abcdefgh[10], abcdefgh[11], abcdefgh[12], abcdefgh[13]],
                        [abcdefgh[14], abcdefgh[15], np.inf, np.inf]]
 
-    def compute_matching_label(self, x: float):
+    def compute_matching_labels(self, x: float) -> list[Any]:
         memberships = []
         for label, params in zip(self.labels, self.config):
             member = fuzz.trapmf(x=np.asarray([x]), abcd=params)
             memberships.append((label, member[0]))
 
-        return max(memberships, key=lambda tup: tup[1])[0]
+        return list(filter(lambda tup: tup[1] > 0, memberships))

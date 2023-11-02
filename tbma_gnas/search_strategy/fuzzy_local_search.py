@@ -1,4 +1,4 @@
-from tbma_gnas.fuzzy_comparator.fuzzy_comparator import accept_optimum
+from tbma_gnas.fuzzy_comparator.fuzzy_comparator import RuleConsequent
 from tbma_gnas.search_space.utils import reset_model_parameters
 from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
 from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
@@ -42,10 +42,10 @@ def fuzzy_local_search(dataset, num_iters: int, max_depth: int = None):
             new_size = new_model.size()
             logger.info("Validation accuracy: " + str(new_acc) + " - Size: " + str(new_size))
 
-            acc_label, size_label = comparator.compute_matching_labels(best_size, best_acc, new_size, new_acc)
-            logger.info("Fuzzy labels - Accuracy: " + str(acc_label) + " Size: " + str(size_label))
+            rule_consequent = comparator.compute_fired_rules(best_size, best_acc, new_size, new_acc)
+            logger.info("Fired rule consequent - " + str(rule_consequent[0]) + " - " + str(rule_consequent[1]))
 
-            if accept_optimum(acc_label=acc_label, size_label=size_label):
+            if rule_consequent[0] == RuleConsequent.NEW_BEST:
                 best_model, best_acc, best_size = new_model, new_acc, new_size
                 search_space.learn(model=best_model, positive=True)
                 search_space.update_previous_state(model=best_model)
