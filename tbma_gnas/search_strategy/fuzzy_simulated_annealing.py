@@ -44,9 +44,8 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
             current_size = current_model.size()
             logger.info("Validation accuracy: " + str(current_acc) + " - Size: " + str(current_size))
 
-            rule_consequent_incumbent = comparator.compute_fired_rules(incumbent_size, incumbent_acc, current_size,
-                                                                       current_acc)
-            logger.info("Fired rule w.r.t incumbent - " + str(rule_consequent_incumbent[0]) + " - " + str(rule_consequent_incumbent[1]))
+            rule_consequent_incumbent = comparator.compute_fired_rules(incumbent_size, incumbent_acc, current_size,current_acc)
+            logger.info("Fired rule w.r.t incumbent - " + str(rule_consequent_incumbent))
 
             if rule_consequent_incumbent[0] == RuleConsequent.NEW_INCUMBENT or rule_consequent_incumbent[0] == RuleConsequent.NEW_BEST:
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
@@ -55,7 +54,7 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
                 operator_weights[op_idx] += 1
                 logger.info("Incumbent updated")
                 rule_consequent_optimum = comparator.compute_fired_rules(best_size, best_val_acc, incumbent_size,incumbent_acc)
-                logger.info("Fired rule w.r.t optimum - " + str(rule_consequent_optimum[0]) + " - " + str(rule_consequent_optimum[1]))
+                logger.info("Fired rule w.r.t optimum - " + str(rule_consequent_optimum))
                 if rule_consequent_optimum[0] == RuleConsequent.NEW_BEST:
                     best_model, best_val_acc, best_size = incumbent_model, incumbent_acc, incumbent_size
                     search_space.learn(model=best_model, positive=True)

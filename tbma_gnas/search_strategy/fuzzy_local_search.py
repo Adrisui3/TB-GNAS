@@ -43,7 +43,7 @@ def fuzzy_local_search(dataset, num_iters: int, max_depth: int = None):
             logger.info("Validation accuracy: " + str(new_acc) + " - Size: " + str(new_size))
 
             rule_consequent = comparator.compute_fired_rules(best_size, best_acc, new_size, new_acc)
-            logger.info("Fired rule consequent - " + str(rule_consequent[0]) + " - " + str(rule_consequent[1]))
+            logger.info("Fired rule consequent - " + str(rule_consequent))
 
             if rule_consequent[0] == RuleConsequent.NEW_BEST:
                 best_model, best_acc, best_size = new_model, new_acc, new_size

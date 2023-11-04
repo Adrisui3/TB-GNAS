@@ -27,11 +27,9 @@ class RuleConsequent(Enum):
 
 
 class FuzzyComparator:
-    ACCURACY_LABELS = [-0.03, -0.015, -0.03, -0.015, -0.015, 0.00, -0.015, 0.00, 0.00, 0.015, 0.00, 0.015, 0.015, 0.03,
-                       0.015, 0.03]
+    ACCURACY_LABELS = [-0.1, -0.05, -0.1, -0.05, -0.02, 0.00, -0.01, 0.00, 0.00, 0.01, 0.00, 0.03, 0.05, 0.1, 0.05, 0.1]
 
-    SIZE_LABELS = [-0.03, -0.015, -0.03, -0.015, -0.015, 0.00, -0.015, 0.00, 0.00, 0.015, 0.00, 0.015, 0.015, 0.03,
-                   0.015, 0.03]
+    SIZE_LABELS = [-0.15, -0.1, -0.15, -0.1, -0.05, 0.00, -0.025, 0.00, 0.00, 0.015, 0.00, 0.025, 0.05, 0.1, 0.05, 0.1]
 
     RULE_SET = {
         AccLabel.MUCH_LESS: {
@@ -84,15 +82,11 @@ class FuzzyComparator:
                     SizeLabel.MUCH_BIGGER],
             abcdefgh=self.SIZE_LABELS)
 
-    def compute_fired_rules(self, ref_size: int, ref_val_acc: float, cand_size: int, cand_val_acc: float) -> tuple:
+    def compute_fired_rules(self, ref_size: int, ref_val_acc: float, cand_size: int, cand_val_acc: float) -> RuleConsequent:
         acc_labels = self.acc_variable.compute_matching_labels(x=cand_val_acc - ref_val_acc)
         size_labels = self.size_variable.compute_matching_labels(x=(cand_size / ref_size) - 1)
 
-        fired_rules = []
-        for acc in acc_labels:
-            for size in size_labels:
-                consequent = self.RULE_SET[acc[0]][size[0]]
-                weight = min(acc[1], size[1])
-                fired_rules.append((consequent, weight))
+        max_acc_label = max(acc_labels, key=lambda tup: tup[1])[0]
+        max_size_label = max(size_labels, key=lambda tup: tup[1])[0]
 
-        return max(fired_rules, key=lambda tup: tup[1])
+        return self.RULE_SET[max_acc_label][max_size_label]
