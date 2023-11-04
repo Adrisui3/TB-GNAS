@@ -47,8 +47,7 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
             rule_consequent_incumbent = comparator.compute_fired_rules(incumbent_size, incumbent_acc, current_size,current_acc)
             logger.info("Fired rule w.r.t incumbent - " + str(rule_consequent_incumbent))
 
-            if rule_consequent_incumbent == RuleConsequent.NEW_INCUMBENT or rule_consequent_incumbent[
-                0] == RuleConsequent.NEW_BEST:
+            if rule_consequent_incumbent == RuleConsequent.NEW_INCUMBENT or rule_consequent_incumbent == RuleConsequent.NEW_BEST:
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.learn(model=incumbent_model, positive=True)
                 search_space.update_previous_state(model=incumbent_model)
