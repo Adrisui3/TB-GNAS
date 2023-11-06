@@ -10,7 +10,7 @@ def setup_search(dataset, max_depth: int, fuzzy: bool):
     search_space = SearchSpace(num_node_features=dataset.num_node_features, data_out_shape=dataset.num_classes,
                                max_depth=max_depth)
     logger.info("Search Space initialized")
-    evaluator = Evaluator(logger)
+    evaluator = Evaluator(logger, dataset)
     logger.info("Evaluator initialized. Device: " + evaluator.get_device())
 
     comparator = None

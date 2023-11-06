@@ -1,0 +1,14 @@
+---- DATASET: Citeseer()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): ChebConv(3703, 366, K=5, normalization=sym)
+    (1): Sigmoid()
+    (2): Dropout(p=0.45, inplace=False)
+    (3): GCNConv(366, 6)
+    (4): Sigmoid()
+    (5): Dropout(p=0.6, inplace=False)
+  )
+), 0.716, 6779058, 294.0855600833893, [(0, 0.608, 44442), (1, 0.646, 111096), (12, 0.656, 111096), (17, 0.678, 11872608), (23, 0.68, 111096), (51, 0.698, 6779058), (126, 0.726, 6779058)])
+Average acc:  0.6701 +/- 0.03248625350308443
+Average size:  3948690.2 +/- 5306246.806256537
+Average runtime:  144.63069620927175 +/- 47.29631329770656

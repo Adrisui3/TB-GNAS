@@ -12,7 +12,7 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
     model_cache = {}
 
     logger.info("Generating and training initial model - STARTING")
-    best_model, best_val_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model(), dataset=dataset)
+    best_model, best_val_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model())
     best_size = best_model.size()
     incumbent_model, incumbent_acc, incumbent_size = best_model, best_val_acc, best_size
     search_space.update_previous_state(model=best_model)
@@ -35,7 +35,7 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
 
         try:
             if current_model not in model_cache:
-                current_model, current_acc = evaluator.low_fidelity_estimation(model=current_model, dataset=dataset)
+                current_model, current_acc = evaluator.low_fidelity_estimation(model=current_model)
                 model_cache[current_model] = current_acc
             else:
                 logger.info("Cached model, skipping evaluation...")
@@ -78,7 +78,7 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
 
     logger.info("Evaluating model in test set...")
     reset_model_parameters(best_model.get_blocks())
-    best_model, test_acc = evaluator.evaluate_in_test(best_model, dataset)
+    best_model, test_acc = evaluator.evaluate_in_test(best_model)
     logger.info("Test set accuracy: " + str(test_acc))
 
     return best_model, test_acc, history

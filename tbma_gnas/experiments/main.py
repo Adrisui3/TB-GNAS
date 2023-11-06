@@ -1,6 +1,9 @@
+import gc
 import os
 import time
 from datetime import datetime
+
+import torch.cuda
 
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 os.environ["OMP_NUM_THREADS"] = '1'
@@ -37,6 +40,10 @@ if __name__ == "__main__":
                 print("Blocks: ", gnn.get_blocks())
                 print("Size: ", gnn.size())
                 print("Test accuracy:", acc)
+
+                del gnn
+                torch.cuda.empty_cache()
+                gc.collect()
 
             with open(RESULTS_PATH + "models/" + formatted_datetime + "_" + alg.__name__ + "_" + df.name + ".txt",
                       "a") as f:

@@ -10,7 +10,7 @@ def fuzzy_local_search(dataset, num_iters: int, max_depth: int = None):
     operator_weights = [num_iters] * len(ALL_OPERATORS)
 
     logger.info("Generating and training initial model - STARTING")
-    best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model(), dataset=dataset)
+    best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model())
     best_size = best_model.size()
     search_space.update_previous_state(model=best_model)
     model_cache[best_model] = best_acc
@@ -33,7 +33,7 @@ def fuzzy_local_search(dataset, num_iters: int, max_depth: int = None):
         try:
             if new_model not in model_cache:
                 logger.info("Unvisited model, evaluating...")
-                new_model, new_acc = evaluator.low_fidelity_estimation(model=new_model, dataset=dataset)
+                new_model, new_acc = evaluator.low_fidelity_estimation(model=new_model)
                 model_cache[new_model] = new_acc
             else:
                 logger.info("Cached model, skipping evaluation...")
@@ -64,7 +64,7 @@ def fuzzy_local_search(dataset, num_iters: int, max_depth: int = None):
 
     logger.info("Evaluating model in test set...")
     reset_model_parameters(best_model.get_blocks())
-    best_model, test_acc = evaluator.evaluate_in_test(best_model, dataset)
+    best_model, test_acc = evaluator.evaluate_in_test(best_model)
     logger.info("Test set accuracy: " + str(test_acc))
 
     return best_model, test_acc, history

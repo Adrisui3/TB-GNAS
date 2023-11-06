@@ -6,6 +6,8 @@ from tbma_gnas.search_space.utils import reset_model_parameters
 from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
 from tbma_gnas.search_strategy.utils import setup_search, unhandled_model, objective_function
 
+MAX_FAILED_MODELS = 150
+
 
 def simulated_annealing(dataset, t_ini: float = 3.076e-3, t_end: float = 5.0071e-5, alpha: float = 0.97275,
                         max_depth: int = None):
@@ -14,7 +16,7 @@ def simulated_annealing(dataset, t_ini: float = 3.076e-3, t_end: float = 5.0071e
     model_cache = {}
 
     logger.info("Generating and training initial model - STARTING")
-    best_model, best_val_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model(), dataset=dataset)
+    best_model, best_val_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model())
     best_size = best_model.size()
     incumbent_model, incumbent_acc, incumbent_size = best_model, best_val_acc, best_size
     best_objective = objective_function(best_val_acc, best_size)
@@ -40,7 +42,7 @@ def simulated_annealing(dataset, t_ini: float = 3.076e-3, t_end: float = 5.0071e
 
         try:
             if current_model not in model_cache:
-                current_model, current_acc = evaluator.low_fidelity_estimation(model=current_model, dataset=dataset)
+                current_model, current_acc = evaluator.low_fidelity_estimation(model=current_model)
                 model_cache[current_model] = current_acc
             else:
                 logger.info("Cached model, skipping evaluation...")
@@ -81,12 +83,12 @@ def simulated_annealing(dataset, t_ini: float = 3.076e-3, t_end: float = 5.0071e
         except Exception as exception:
             unhandled_model(exception, logger, current_model)
             failed_models += 1
-            if failed_models > 150:
+            if failed_models > MAX_FAILED_MODELS:
                 raise
 
     logger.info("Evaluating model in test set...")
     reset_model_parameters(best_model.get_blocks())
-    best_model, test_acc = evaluator.evaluate_in_test(best_model, dataset)
+    best_model, test_acc = evaluator.evaluate_in_test(best_model)
     logger.info("Test set accuracy: " + str(test_acc))
 
     return best_model, test_acc, history
