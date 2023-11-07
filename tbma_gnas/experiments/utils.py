@@ -4,62 +4,62 @@ from torch_geometric.datasets import Planetoid
 PARAMS_PER_DATASET = {"PubMed":
     {"fuzzy_local_search": {
         "num_iters": 150,
-        "max_depth": 2,
+        "max_depth": 3,
     },
         "fuzzy_simulated_annealing": {
             "num_iters": 150,
-            "max_depth": 2
+            "max_depth": 3
         },
         "local_search": {
             "num_iters": 150,
-            "max_depth": 2
+            "max_depth": 3
 
         },
         "simulated_annealing": {
             "t_ini": 3.076e-3,
             "t_end": 5.0071e-5,
             "alpha": 0.97275,
-            "max_depth": 2
+            "max_depth": 3
         }},
     "Cora":
         {"fuzzy_local_search": {
             "num_iters": 150,
-            "max_depth": 2,
+            "max_depth": 3,
         },
             "fuzzy_simulated_annealing": {
                 "num_iters": 150,
-                "max_depth": 2
+                "max_depth": 3
             },
             "local_search": {
                 "num_iters": 150,
-                "max_depth": 2
+                "max_depth": 3
 
             },
             "simulated_annealing": {
                 "t_ini": 0.0004430253154047865,
                 "t_end": 8.345205017383352e-06,
                 "alpha": 0.9737,
-                "max_depth": 2
+                "max_depth": 3
             }},
     "Citeseer":
         {"fuzzy_local_search": {
             "num_iters": 150,
-            "max_depth": 2,
+            "max_depth": 3,
         },
             "fuzzy_simulated_annealing": {
                 "num_iters": 150,
-                "max_depth": 2
+                "max_depth": 3
             },
             "local_search": {
                 "num_iters": 150,
-                "max_depth": 2
+                "max_depth": 3
 
             },
             "simulated_annealing": {
                 "t_ini": 0.00017228762265741697,
                 "t_end": 2.8373697059103396e-06,
                 "alpha": 0.97285,
-                "max_depth": 2
+                "max_depth": 3
             }}
 }
 
