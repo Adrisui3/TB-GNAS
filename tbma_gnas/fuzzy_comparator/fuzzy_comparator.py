@@ -51,7 +51,7 @@ class FuzzyComparator:
         AccLabel.EQUAL: {
             SizeLabel.MUCH_SMALLER: RuleConsequent.NEW_BEST,
             SizeLabel.SMALLER: RuleConsequent.NEW_BEST,
-            SizeLabel.EQUAL: RuleConsequent.REJECT,
+            SizeLabel.EQUAL: RuleConsequent.NEW_INCUMBENT,
             SizeLabel.BIGGER: RuleConsequent.NEW_INCUMBENT,
             SizeLabel.MUCH_BIGGER: RuleConsequent.NEW_INCUMBENT
         },
@@ -82,7 +82,8 @@ class FuzzyComparator:
                     SizeLabel.MUCH_BIGGER],
             abcdefgh=self.SIZE_LABELS)
 
-    def compute_fired_rules(self, ref_size: int, ref_val_acc: float, cand_size: int, cand_val_acc: float) -> RuleConsequent:
+    def compute_fired_rules(self, ref_size: int, ref_val_acc: float, cand_size: int,
+                            cand_val_acc: float) -> RuleConsequent:
         acc_labels = self.acc_variable.compute_matching_labels(x=cand_val_acc - ref_val_acc)
         size_labels = self.size_variable.compute_matching_labels(x=(cand_size / ref_size) - 1)
 
