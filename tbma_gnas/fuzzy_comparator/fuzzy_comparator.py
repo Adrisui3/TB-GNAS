@@ -51,7 +51,7 @@ class FuzzyComparator:
         AccLabel.EQUAL: {
             SizeLabel.MUCH_SMALLER: RuleConsequent.NEW_BEST,
             SizeLabel.SMALLER: RuleConsequent.NEW_BEST,
-            SizeLabel.EQUAL: RuleConsequent.NEW_INCUMBENT,
+            SizeLabel.EQUAL: RuleConsequent.REDEMPTION,
             SizeLabel.BIGGER: RuleConsequent.NEW_INCUMBENT,
             SizeLabel.MUCH_BIGGER: RuleConsequent.NEW_INCUMBENT
         },
