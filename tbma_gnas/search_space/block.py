@@ -21,10 +21,8 @@ def compute_out_channels(is_output: bool, data_out_shape: int, prev_out_channels
         case DimensionRatio.EQUAL:
             return max(prev_out_channels // heads, data_out_shape)
         case DimensionRatio.REDUCE:
-            # return max(prev_out_channels // (2 * heads), data_out_shape)
             return random.randint(data_out_shape, max(prev_out_channels // 2, data_out_shape))
         case DimensionRatio.INCREASE:
-            # return min((prev_out_channels * 2) // heads, num_node_features)
             return random.randint(prev_out_channels + 1, 2 * prev_out_channels)
 
 

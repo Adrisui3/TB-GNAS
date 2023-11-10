@@ -1,0 +1,28 @@
+---- DATASET: PubMed()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GATConv(500, 42, heads=5)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GraphConv(210, 3)
+    (4): Sigmoid()
+    (5): Dropout(p=0.0, inplace=False)
+  )
+), 0.796, 106893, 207.678218126297, [(0, 0.71, 3003), (5, 0.788, 144275), (68, 0.784, 125987), (77, 0.792, 111763), (94, 0.81, 110773), (111, 0.82, 111983), (113, 0.824, 106893)])
+Average acc:  0.7697666666666667 +/- 0.014739252204761135
+Average size:  92618.93333333333 +/- 72544.24318852293
+Average runtime:  121.62034796079 +/- 42.51475753036447
+---- DATASET: Cora()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GraphConv(1433, 114)
+    (1): ReLU()
+    (2): Dropout(p=0.0, inplace=False)
+    (3): GCNConv(114, 7)
+    (4): Sigmoid()
+    (5): Dropout(p=0.6, inplace=False)
+  )
+), 0.811, 327529, 33.7126088142395, [(0, 0.71, 20069), (3, 0.73, 733764), (6, 0.76, 733764), (13, 0.774, 333199), (146, 0.786, 327529)])
+Average acc:  0.7667666666666668 +/- 0.035520588708835094
+Average size:  581573.2666666667 +/- 531288.5613996054
+Average runtime:  49.96022058327993 +/- 14.396036811642588
