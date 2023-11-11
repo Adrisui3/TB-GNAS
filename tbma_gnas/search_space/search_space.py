@@ -56,8 +56,7 @@ class SearchSpace:
 
             # Iterate over the blocks and query them with the appropriate input and output dimensions
             for block in self.space[depth]:
-                prev_out_shape = compute_prev_out_shape(
-                    model[-1][0]) if not block.get_input() else self.num_node_features
+                prev_out_shape = compute_prev_out_shape(model[-1][0]) if not block.get_input() else self.num_node_features
                 gen_block = block.query(prev_out_shape=prev_out_shape, data_out_shape=self.data_out_shape)
                 model.append(gen_block)
 
@@ -136,11 +135,9 @@ class SearchSpace:
             new_in_channels = self._compute_new_in_channels(block_idx, blocks)
 
             if complete_layer:
-                new_block = self.space[model_depth][block_idx].query(prev_out_shape=new_in_channels,
-                                                                     data_out_shape=self.data_out_shape)
+                new_block = self.space[model_depth][block_idx].query(prev_out_shape=new_in_channels, data_out_shape=self.data_out_shape)
             else:
-                prev_block_out_shape = compute_prev_out_shape(
-                    blocks[block_idx - 1][0]) if block_idx != 0 else self.num_node_features
+                prev_block_out_shape = compute_prev_out_shape(blocks[block_idx - 1][0]) if block_idx != 0 else self.num_node_features
                 new_block = self.space[model_depth][block_idx].query_hyperparameters_for_block(blocks[block_idx],
                                                                                                self.data_out_shape,
                                                                                                prev_block_out_shape)

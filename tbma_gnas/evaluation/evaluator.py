@@ -1,5 +1,6 @@
-import torch
 import gc
+
+import torch
 from sklearn.metrics import accuracy_score
 from torch.nn import CrossEntropyLoss
 
@@ -22,7 +23,7 @@ class Evaluator:
     LOW_FIDELITY_EPOCHS = 25
     LOW_FIDELITY_PATIENCE = 5
 
-    TRAINING_PATIENCE = 7
+    TRAINING_PATIENCE = 10
     TRAINING_EPOCHS = 100
 
     def __init__(self, logger: Logger, dataset):
