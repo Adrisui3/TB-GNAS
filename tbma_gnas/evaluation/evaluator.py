@@ -41,6 +41,9 @@ class Evaluator:
         return self.train(model, self.TRAINING_EPOCHS, self.TRAINING_PATIENCE, validation=False)
 
     def train(self, model: HyperModel, epochs: int, patience: int, validation: bool = True):
+        torch.cuda.empty_cache()
+        gc.collect()
+
         model.to(self.device)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
         criterion = CrossEntropyLoss()
