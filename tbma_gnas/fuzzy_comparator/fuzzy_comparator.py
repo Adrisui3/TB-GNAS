@@ -21,9 +21,8 @@ class AccLabel(Enum):
 
 class RuleConsequent(Enum):
     NEW_BEST = 1
-    NEW_INCUMBENT = 2
-    REDEMPTION = 3
-    REJECT = 4
+    REDEMPTION = 2
+    REJECT = 3
 
 
 class FuzzyComparator:
@@ -52,8 +51,8 @@ class FuzzyComparator:
             SizeLabel.MUCH_SMALLER: RuleConsequent.NEW_BEST,
             SizeLabel.SMALLER: RuleConsequent.NEW_BEST,
             SizeLabel.EQUAL: RuleConsequent.REDEMPTION,
-            SizeLabel.BIGGER: RuleConsequent.NEW_INCUMBENT,
-            SizeLabel.MUCH_BIGGER: RuleConsequent.NEW_INCUMBENT
+            SizeLabel.BIGGER: RuleConsequent.REDEMPTION,
+            SizeLabel.MUCH_BIGGER: RuleConsequent.REDEMPTION
         },
 
         AccLabel.MORE: {
