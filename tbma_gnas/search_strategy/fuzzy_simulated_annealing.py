@@ -49,7 +49,6 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
 
             if rule_consequent_incumbent == RuleConsequent.NEW_INCUMBENT or rule_consequent_incumbent == RuleConsequent.NEW_BEST:
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
-                search_space.learn(model=incumbent_model, positive=True)
                 search_space.update_previous_state(model=incumbent_model)
                 operator_weights[op_idx] += 1
                 logger.info("Incumbent updated")
@@ -57,7 +56,6 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
                 logger.info("Fired rule w.r.t optimum - " + str(rule_consequent_optimum))
                 if rule_consequent_optimum == RuleConsequent.NEW_BEST:
                     best_model, best_val_acc, best_size = incumbent_model, incumbent_acc, incumbent_size
-                    search_space.learn(model=best_model, positive=True)
                     operator_weights[op_idx] += 1
                     history.append((explored_models, best_val_acc, best_size))
                     logger.info("Optimum updated")

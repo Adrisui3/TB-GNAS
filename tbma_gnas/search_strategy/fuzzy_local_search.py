@@ -6,8 +6,8 @@ from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
 
 def fuzzy_local_search(dataset, num_iters: int, max_depth: int = None):
     logger, search_space, evaluator, comparator = setup_search(dataset=dataset, max_depth=max_depth, fuzzy=True)
+    operator_weights = [1] * len(ALL_OPERATORS)
     model_cache = {}
-    operator_weights = [num_iters] * len(ALL_OPERATORS)
 
     logger.info("Generating and training initial model - STARTING")
     best_model, best_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model())
@@ -47,7 +47,6 @@ def fuzzy_local_search(dataset, num_iters: int, max_depth: int = None):
 
             if rule_consequent == RuleConsequent.NEW_BEST:
                 best_model, best_acc, best_size = new_model, new_acc, new_size
-                search_space.learn(model=best_model, positive=True)
                 search_space.update_previous_state(model=best_model)
                 operator_weights[op_idx] += 1
                 history.append((explored_models, best_acc, best_size))
