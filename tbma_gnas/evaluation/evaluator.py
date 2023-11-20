@@ -26,10 +26,23 @@ class Evaluator:
     TRAINING_PATIENCE = 10
     TRAINING_EPOCHS = 100
 
+    ADAM_PARAMETERS = {"lr": {
+        "PubMed": 0.01,
+        "Cora": 0.005,
+        "Citeseer": 0.005},
+        "weight_decay": {
+            "PubMed": 0.001,
+            "Cora": 0.0005,
+            "Citeseer": 0.0005
+        }
+    }
+
     def __init__(self, logger: Logger, dataset):
         self.logger = logger
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.data = dataset[0].to(self.device)
+        self.lr = self.ADAM_PARAMETERS["lr"][dataset.name]
+        self.weight_decay = self.ADAM_PARAMETERS["weight_decay"][dataset.name]
 
     def get_device(self) -> str:
         return str(self.device)
@@ -45,7 +58,7 @@ class Evaluator:
         gc.collect()
 
         model.to(self.device)
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         criterion = CrossEntropyLoss()
         early_stop = EarlyStop(patience=patience)
 
