@@ -12,6 +12,7 @@ import numpy as np
 
 from tbma_gnas.experiments.utils import load_datasets, trim_results, PARAMS_PER_DATASET
 from tbma_gnas.search_strategy.fuzzy_simulated_annealing import fuzzy_simulated_annealing
+from tbma_gnas.search_strategy.fuzzy_local_search import fuzzy_local_search
 
 RESULTS_PATH = "./tbma_gnas/results/"
 RUNS = 32
@@ -19,7 +20,7 @@ RUNS = 32
 if __name__ == "__main__":
     dfs = load_datasets()
 
-    for alg in [fuzzy_simulated_annealing]:
+    for alg in [fuzzy_local_search, fuzzy_simulated_annealing]:
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%m-%d-%Y_%H:%M:%S")
         for df in dfs:
