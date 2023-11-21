@@ -20,7 +20,7 @@ RUNS = 32
 if __name__ == "__main__":
     dfs = load_datasets()
 
-    for alg in [fuzzy_local_search, fuzzy_simulated_annealing]:
+    for alg in [fuzzy_simulated_annealing]:
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%m-%d-%Y_%H:%M:%S")
         for df in dfs:
