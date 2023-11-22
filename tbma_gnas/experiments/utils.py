@@ -69,7 +69,7 @@ def load_datasets():
     cora = Planetoid(root='./tbma_gnas/experiments/datasets/Cora', name='Cora')
     citeseer = Planetoid(root='./tbma_gnas/experiments/datasets/Citeseer', name='Citeseer')
 
-    return [pubmed, cora]
+    return [pubmed, cora, citeseer]
 
 
 def trim_results(res):

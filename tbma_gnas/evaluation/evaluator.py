@@ -28,12 +28,12 @@ class Evaluator:
 
     ADAM_PARAMETERS = {"lr": {
         "PubMed": 0.01,
-        "Cora": 0.005,
-        "Citeseer": 0.005},
+        "Cora": 0.01,
+        "Citeseer": 0.01},
         "weight_decay": {
-            "PubMed": 0.001,
-            "Cora": 0.0005,
-            "Citeseer": 0.0005
+            "PubMed": 5e-4,
+            "Cora": 5e-4,
+            "Citeseer": 5e-4
         }
     }
 
