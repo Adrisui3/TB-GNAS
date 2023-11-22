@@ -8,8 +8,8 @@ RUN pip3 install --no-cache-dir pyg_lib torch_scatter torch_sparse torch_cluster
 RUN pip3 install --no-cache-dir pytest
 
 RUN apt update && apt install -y git
-RUN git clone https://github.com/Adrisui3/TBMA-GNAS.git
+RUN git clone https://github.com/Adrisui3/TB-NAS.git
 
-WORKDIR TBMA-GNAS/
+WORKDIR TB-NAS/
 
-CMD ["python3", "-m", "tbma_gnas.experiments.main"]
+CMD ["python3", "-m", "tb_nas.experiments.main"]

@@ -14,7 +14,7 @@ from tbma_gnas.experiments.utils import load_datasets, trim_results, PARAMS_PER_
 from tbma_gnas.search_strategy.fuzzy_simulated_annealing import fuzzy_simulated_annealing
 from tbma_gnas.search_strategy.fuzzy_local_search import fuzzy_local_search
 
-RESULTS_PATH = "./tbma_gnas/results/"
+RESULTS_PATH = "./tb_nas/results/"
 RUNS = 32
 
 if __name__ == "__main__":
