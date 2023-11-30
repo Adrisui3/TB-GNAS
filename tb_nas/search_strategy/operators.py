@@ -1,7 +1,7 @@
 import random
 
-from tbma_gnas.search_space.hypermodel import HyperModel
-from tbma_gnas.search_space.search_space import SearchSpace
+from tb_nas.search_space.hypermodel import HyperModel
+from tb_nas.search_space.search_space import SearchSpace
 
 
 def increase_depth(space: SearchSpace, model: HyperModel):

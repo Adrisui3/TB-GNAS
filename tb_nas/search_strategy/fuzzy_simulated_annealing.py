@@ -1,9 +1,9 @@
 import random
 
-from tbma_gnas.fuzzy_comparator.fuzzy_comparator import RuleConsequent
-from tbma_gnas.search_space.utils import reset_model_parameters
-from tbma_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
-from tbma_gnas.search_strategy.utils import setup_search, unhandled_model
+from tb_nas.fuzzy_comparator.fuzzy_comparator import RuleConsequent
+from tb_nas.search_space.utils import reset_model_parameters
+from tb_nas.search_strategy.operators import select_operator, ALL_OPERATORS
+from tb_nas.search_strategy.utils import setup_search, unhandled_model
 
 
 def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):

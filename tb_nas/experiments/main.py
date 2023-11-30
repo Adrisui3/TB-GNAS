@@ -4,15 +4,14 @@ import time
 from datetime import datetime
 
 import torch.cuda
+import numpy as np
+
+from tb_nas.experiments.utils import load_datasets, trim_results, PARAMS_PER_DATASET
+from tb_nas.search_strategy.fuzzy_simulated_annealing import fuzzy_simulated_annealing
+from tb_nas.search_strategy.fuzzy_local_search import fuzzy_local_search
 
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 os.environ["OMP_NUM_THREADS"] = '1'
-
-import numpy as np
-
-from tbma_gnas.experiments.utils import load_datasets, trim_results, PARAMS_PER_DATASET
-from tbma_gnas.search_strategy.fuzzy_simulated_annealing import fuzzy_simulated_annealing
-from tbma_gnas.search_strategy.fuzzy_local_search import fuzzy_local_search
 
 RESULTS_PATH = "./tb_nas/results/"
 RUNS = 32

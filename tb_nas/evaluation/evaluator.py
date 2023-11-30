@@ -4,9 +4,9 @@ import torch
 from sklearn.metrics import accuracy_score
 from torch.nn import CrossEntropyLoss
 
-from tbma_gnas.evaluation.early_stop import EarlyStop
-from tbma_gnas.logger.logger import Logger
-from tbma_gnas.search_space.hypermodel import HyperModel
+from tb_nas.evaluation.early_stop import EarlyStop
+from tb_nas.logger.logger import Logger
+from tb_nas.search_space.hypermodel import HyperModel
 
 
 def train_one_epoch(optimizer, criterion, model: HyperModel, data):
