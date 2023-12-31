@@ -3,12 +3,11 @@ import os
 import time
 from datetime import datetime
 
-import torch.cuda
 import numpy as np
+import torch.cuda
 
 from tb_nas.experiments.utils import load_datasets, trim_results, PARAMS_PER_DATASET
 from tb_nas.search_strategy.fuzzy_simulated_annealing import fuzzy_simulated_annealing
-from tb_nas.search_strategy.fuzzy_local_search import fuzzy_local_search
 
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 os.environ["OMP_NUM_THREADS"] = '1'
@@ -19,7 +18,7 @@ RUNS = 32
 if __name__ == "__main__":
     dfs = load_datasets()
 
-    for alg in [fuzzy_local_search, fuzzy_simulated_annealing]:
+    for alg in [fuzzy_simulated_annealing]:
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%m-%d-%Y_%H:%M:%S")
         for df in dfs:
