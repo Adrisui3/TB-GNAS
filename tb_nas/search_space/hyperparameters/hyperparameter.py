@@ -11,5 +11,4 @@ class HyperParameter:
         self.scores[prev_value] = max(self.scores[prev_value] + feedback, 1)
 
     def query(self):
-        weights = [self.scores[value] for value in self.values]
-        return random.choices(population=self.values, weights=weights, k=1)[0]
+        return random.choices(population=self.values, weights=None, k=1)[0]

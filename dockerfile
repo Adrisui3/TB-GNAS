@@ -8,7 +8,7 @@ RUN pip3 install --no-cache-dir pyg_lib torch_scatter torch_sparse torch_cluster
 RUN pip3 install --no-cache-dir pytest
 
 RUN apt update && apt install -y git
-RUN git clone https://github.com/Adrisui3/TB-NAS.git
+RUN git clone -b ablation_study https://github.com/Adrisui3/TB-NAS.git
 
 WORKDIR TB-NAS/
 

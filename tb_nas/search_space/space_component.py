@@ -22,5 +22,4 @@ class LearnableSpaceComponent:
 
     def query(self):
         options = list(self.components.keys())
-        weights = [self.scores[component] for component in options]
-        return self.components[random.choices(population=options, weights=weights, k=1)[0]]
+        return self.components[random.choices(population=options, weights=None, k=1)[0]]
