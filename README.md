@@ -1,1 +1,1 @@
-# TBMA-GNAS
+# Trajectory-based Graph Neural Architecture Search
