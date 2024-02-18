@@ -6,13 +6,13 @@ from datetime import datetime
 import numpy as np
 import torch.cuda
 
-from tb_nas.experiments.utils import load_datasets, trim_results, PARAMS_PER_DATASET
-from tb_nas.search_strategy.fuzzy_simulated_annealing import fuzzy_simulated_annealing
+from tb_gnas.experiments.utils import load_datasets, trim_results, PARAMS_PER_DATASET
+from tb_gnas.search_strategy.fuzzy_simulated_annealing import fuzzy_simulated_annealing
 
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 os.environ["OMP_NUM_THREADS"] = '1'
 
-RESULTS_PATH = "./tb_nas/results/"
+RESULTS_PATH = "./tb_gnas/results/"
 RUNS = 32
 
 if __name__ == "__main__":

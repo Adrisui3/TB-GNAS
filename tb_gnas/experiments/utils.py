@@ -65,9 +65,9 @@ PARAMS_PER_DATASET = {"PubMed":
 
 
 def load_datasets():
-    pubmed = Planetoid(root='./tb_nas/experiments/datasets/PubMed', name='PubMed')
-    cora = Planetoid(root='./tb_nas/experiments/datasets/Cora', name='Cora')
-    citeseer = Planetoid(root='./tb_nas/experiments/datasets/Citeseer', name='Citeseer')
+    pubmed = Planetoid(root='./tb_gnas/experiments/datasets/PubMed', name='PubMed')
+    cora = Planetoid(root='./tb_gnas/experiments/datasets/Cora', name='Cora')
+    citeseer = Planetoid(root='./tb_gnas/experiments/datasets/Citeseer', name='Citeseer')
 
     return [pubmed, cora, citeseer]
 

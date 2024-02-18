@@ -2,9 +2,9 @@ import random
 
 import numpy as np
 
-from tb_nas.search_space.utils import reset_model_parameters
-from tb_nas.search_strategy.operators import select_operator, ALL_OPERATORS
-from tb_nas.search_strategy.utils import setup_search, unhandled_model, objective_function
+from tb_gnas.search_space.utils import reset_model_parameters
+from tb_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
+from tb_gnas.search_strategy.utils import setup_search, unhandled_model, objective_function
 
 MAX_FAILED_MODELS = 150
 

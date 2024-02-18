@@ -1,8 +1,8 @@
-from tb_nas.evaluation.evaluator import Evaluator
-from tb_nas.fuzzy_comparator.fuzzy_comparator import FuzzyComparator
-from tb_nas.logger.logger import Logger
-from tb_nas.search_space.hypermodel import HyperModel
-from tb_nas.search_space.search_space import SearchSpace
+from tb_gnas.evaluation.evaluator import Evaluator
+from tb_gnas.fuzzy_comparator.fuzzy_comparator import FuzzyComparator
+from tb_gnas.logger.logger import Logger
+from tb_gnas.search_space.hypermodel import HyperModel
+from tb_gnas.search_space.search_space import SearchSpace
 
 
 def setup_search(dataset, max_depth: int, fuzzy: bool):
