@@ -1,5 +1,7 @@
 import random
 
+import torch.cuda
+
 from tb_gnas.fuzzy_comparator.fuzzy_comparator import RuleConsequent
 from tb_gnas.search_space.utils import reset_model_parameters
 from tb_gnas.search_strategy.operators import select_operator, ALL_OPERATORS
@@ -16,7 +18,7 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
     best_size = best_model.size()
     incumbent_model, incumbent_acc, incumbent_size = best_model, best_val_acc, best_size
     search_space.update_previous_state(model=best_model)
-    model_cache[best_model] = best_val_acc
+    model_cache[best_model.__hash__()] = best_val_acc
     logger.info("Generating and training initial model - DONE")
     logger.info("Initial model blocks: " + str(best_model.get_blocks()))
     logger.info("Initial validation accuracy: " + str(best_val_acc))
@@ -28,18 +30,20 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
 
     while explored_models < num_iters:
         logger.info(" --- ITERATION: " + str(explored_models) + " ---")
+        logger.info("Allocated VRAM: " + str(torch.cuda.memory_allocated() / 1e9) + " GB")
         operator, op_idx = select_operator(weights=operator_weights)
         logger.info("Selected operator: " + operator.__name__)
         current_model = operator(search_space, incumbent_model)
         logger.info("New model generated: " + str(current_model.get_blocks()))
 
         try:
-            if current_model not in model_cache:
+            current_hash = current_model.__hash__()
+            if current_hash not in model_cache:
                 current_model, current_acc = evaluator.low_fidelity_estimation(model=current_model)
-                model_cache[current_model] = current_acc
+                model_cache[current_hash] = current_acc
             else:
                 logger.info("Cached model, skipping evaluation...")
-                current_acc = model_cache[current_model]
+                current_acc = model_cache[current_hash]
 
             current_size = current_model.size()
             logger.info("Validation accuracy: " + str(current_acc) + " - Size: " + str(current_size))
@@ -65,6 +69,8 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
                 logger.info("Incumbent accepted")
                 incumbent_model, incumbent_acc, incumbent_size = current_model, current_acc, current_size
                 search_space.update_previous_state(model=incumbent_model)
+            else:
+                del current_model
 
             explored_models += 1
             failed_models = 0
