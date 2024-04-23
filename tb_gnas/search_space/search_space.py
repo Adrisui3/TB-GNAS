@@ -5,7 +5,7 @@ from threading import Lock
 from torch import nn
 from torch_geometric import nn as geom_nn
 
-from .block import LearnableBlock, compute_out_channels, fix_heads_output_block
+from .learnable_block import LearnableBlock, compute_out_channels, fix_heads_output_block
 from .hypermodel import HyperModel
 from .utils import get_heads_from_layer, compute_prev_block_heads, reset_model_parameters, get_concat_from_layer, \
     compute_prev_block_concat, retrieve_layer_config, compute_layer_out_shape

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .block import retrieve_layer_config, get_module_params
+from .learnable_block import retrieve_layer_config, get_module_params
 
 
 class HyperModel(torch.nn.Module):

@@ -8,15 +8,15 @@ class LearnableSpaceComponent:
     def __init__(self, component_type: ComponentType):
         self.type = component_type
         self.components = component_type.value
-        self.scores = {component_str: 1 for component_str in self.components.keys()}
+        self.scores = {component: 1 for component in self.components}
 
-    def get_components(self) -> dict:
+    def get_components(self) -> set:
         return self.components
 
     def get_scores(self) -> dict:
         return self.scores
 
-    def learn(self, component: str, positive: bool):
+    def learn(self, component, positive: bool):
         feedback = 1 if positive else -1
         self.scores[component] = max(self.scores[component] + feedback, 1)
 

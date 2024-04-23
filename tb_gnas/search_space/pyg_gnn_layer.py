@@ -1,12 +1,15 @@
 import torch
 import torch.nn.functional as F
 from torch.nn import Parameter
+from torch_geometric.datasets import Planetoid
 from torch_geometric.nn.inits import glorot, zeros
 from torch_geometric.utils import remove_self_loops, add_self_loops, add_remaining_self_loops, softmax
 from torch_scatter import scatter_add
 
 from message_passing import MessagePassing
 
+
+# TODO: CREDIT AUTHORS
 
 class GeoLayer(MessagePassing):
 
@@ -115,7 +118,7 @@ class GeoLayer(MessagePassing):
         else:
             # Compute attention coefficients.
             alpha = self.apply_attention(x_i, x_j)
-            alpha = softmax(alpha, edge_index[0].cuda(), num_nodes)
+            alpha = softmax(src=alpha, index=edge_index[0].cuda(), num_nodes=num_nodes)
             # Sample attention coefficients stochastically.
             if self.training and self.dropout > 0:
                 alpha = F.dropout(alpha, p=self.dropout, training=True)
@@ -164,7 +167,7 @@ class GeoLayer(MessagePassing):
         return alpha
 
     def update(self, aggr_out):
-        if self.concat is True:
+        if self.concat:
             aggr_out = aggr_out.view(-1, self.heads * self.out_channels)
         else:
             aggr_out = aggr_out.mean(dim=1)
@@ -184,11 +187,11 @@ class GeoLayer(MessagePassing):
         weight_key = key + "_weight"
         att_key = key + "_att"
         agg_key = key + "_agg"
-        bais_key = key + "_bais"
+        bias_key = key + "_bias"
 
         params[weight_key] = self.weight
         params[att_key] = self.att
-        params[bais_key] = self.bias
+        params[bias_key] = self.bias
         if hasattr(self, "pool_layer"):
             params[agg_key] = self.pool_layer.state_dict()
 
@@ -213,6 +216,10 @@ class GeoLayer(MessagePassing):
         if agg_key in params and hasattr(self, "pool_layer"):
             self.pool_layer.load_state_dict(params[agg_key])
 
+    def get_block(self):
+        return {"attention": self.att_type, "aggregation": self.agg_type, "heads": self.heads, "dropout": self.dropout,
+                "hidden_units": self.out_channels, "concat": self.concat}
+
 
 class GNN(torch.nn.Module):
     def __init__(self):
@@ -229,5 +236,18 @@ class GNN(torch.nn.Module):
 
 
 if __name__ == "__main__":
-    gnn = GNN()
-    print(gnn)
+    dataset = Planetoid(root='/tmp/PubMed', name='PubMed')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = GNN().to(device)
+    data = dataset[0].to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+
+    print(model.gat.get_block())
+
+    model.train()
+    for epoch in range(5):
+        optimizer.zero_grad()
+        out = model(data)
+        loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+        loss.backward()
+        optimizer.step()

@@ -4,6 +4,8 @@ import sys
 import torch
 from torch_scatter import scatter
 
+#TODO: CREDIT AUTHORS
+
 special_args = [
     'edge_index', 'edge_index_i', 'edge_index_j', 'size', 'size_i', 'size_j'
 ]
