@@ -9,19 +9,17 @@ class HyperModel(torch.nn.Module):
     def __init__(self, model_blocks: list):
         super().__init__()
         self.layers = nn.ModuleList()
-        for layer, activation, regularization in model_blocks:
+        for layer in model_blocks:
             self.layers.append(layer)
-            self.layers.append(activation)
-            self.layers.append(regularization)
+            self.layers.append(layer.get_activation())
 
     def get_blocks(self):
-        return [(self.layers[i], self.layers[i + 1], self.layers[i + 2]) for i in range(0, len(self.layers) - 2, 3)]
+        return [(self.layers[i].get_block()) for i in range(0, len(self.layers) - 1, 2)]
 
     def forward(self, x, edge_index):
-        for i in range(0, len(self.layers) - 2, 3):
+        for i in range(0, len(self.layers) - 1, 2):
             x = self.layers[i](x, edge_index)
             x = self.layers[i + 1](x)
-            x = self.layers[i + 2](x)
 
         return F.log_softmax(x, dim=1)
 

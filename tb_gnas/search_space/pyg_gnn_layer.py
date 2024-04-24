@@ -6,16 +6,38 @@ from torch_geometric.nn.inits import glorot, zeros
 from torch_geometric.utils import remove_self_loops, add_self_loops, add_remaining_self_loops, softmax
 from torch_scatter import scatter_add
 
-from message_passing import MessagePassing
+from .message_passing import MessagePassing
 
 
 # TODO: CREDIT AUTHORS
+
+def act_map(act):
+    if act == "linear":
+        return torch.nn.Identity()
+    elif act == "elu":
+        return torch.nn.ELU()
+    elif act == "sigmoid":
+        return torch.nn.Sigmoid()
+    elif act == "tanh":
+        return torch.nn.Tanh()
+    elif act == "relu":
+        return torch.nn.ReLU()
+    elif act == "relu6":
+        return torch.nn.ReLU6()
+    elif act == "softplus":
+        return torch.nn.Softplus()
+    elif act == "leaky_relu":
+        return torch.nn.LeakyReLU()
+    else:
+        raise Exception("wrong activate function")
+
 
 class GeoLayer(MessagePassing):
 
     def __init__(self,
                  in_channels,
                  out_channels,
+                 act_type,
                  heads=1,
                  concat=True,
                  negative_slope=0.2,
@@ -36,6 +58,7 @@ class GeoLayer(MessagePassing):
         self.dropout = dropout
         self.att_type = att_type
         self.agg_type = agg_type
+        self.act_type = act_type
 
         # GCN weight
         self.gcn_weight = None
@@ -181,44 +204,13 @@ class GeoLayer(MessagePassing):
                                              self.in_channels,
                                              self.out_channels, self.heads)
 
-    def get_param_dict(self):
-        params = {}
-        key = "{self.att_type}_{self.agg_type}_{self.in_channels}_{self.out_channels}_{self.heads}"
-        weight_key = key + "_weight"
-        att_key = key + "_att"
-        agg_key = key + "_agg"
-        bias_key = key + "_bias"
-
-        params[weight_key] = self.weight
-        params[att_key] = self.att
-        params[bias_key] = self.bias
-        if hasattr(self, "pool_layer"):
-            params[agg_key] = self.pool_layer.state_dict()
-
-        return params
-
-    def load_param(self, params):
-        key = "{self.att_type}_{self.agg_type}_{self.in_channels}_{self.out_channels}_{self.heads}"
-        weight_key = key + "_weight"
-        att_key = key + "_att"
-        agg_key = key + "_agg"
-        bais_key = key + "_bais"
-
-        if weight_key in params:
-            self.weight = params[weight_key]
-
-        if att_key in params:
-            self.att = params[att_key]
-
-        if bais_key in params:
-            self.bias = params[bais_key]
-
-        if agg_key in params and hasattr(self, "pool_layer"):
-            self.pool_layer.load_state_dict(params[agg_key])
+    def get_activation(self):
+        return act_map(self.act_type)
 
     def get_block(self):
-        return {"attention": self.att_type, "aggregation": self.agg_type, "heads": self.heads, "dropout": self.dropout,
-                "hidden_units": self.out_channels, "concat": self.concat}
+        return {"in_channels": self.in_channels, "attention": self.att_type, "aggregator": self.agg_type,
+                "heads": self.heads, "concat": self.concat, "dropout": self.dropout,
+                "out_channels": self.out_channels, "activation": self.act_type}
 
 
 class GNN(torch.nn.Module):

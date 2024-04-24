@@ -21,6 +21,6 @@ class LearnableSpaceComponent:
         self.scores[component] = max(self.scores[component] + feedback, 1)
 
     def query(self):
-        options = list(self.components.keys())
+        options = list(self.components)
         weights = [self.scores[component] for component in options]
-        return self.components[random.choices(population=options, weights=weights, k=1)[0]]
+        return random.choices(population=options, weights=weights, k=1)[0]
