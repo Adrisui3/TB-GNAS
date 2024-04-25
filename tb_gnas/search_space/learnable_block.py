@@ -1,13 +1,10 @@
 import random
-from typing import Any
-
-import torch
+import copy
 
 from .component_type import ComponentType
 from .hyperparameters.dimension_ratio import DimensionRatio
 from .learnable_space_component import LearnableSpaceComponent
 from .pyg_gnn_layer import GeoLayer
-from .utils import retrieve_layer_config, get_module_params
 
 
 def compute_out_channels(is_output: bool, data_out_shape: int, prev_out_channels: int, dim_ratio: DimensionRatio,
@@ -55,18 +52,18 @@ class LearnableBlock:
     def disable_output(self):
         self.is_output = False
 
-    def learn(self, att: str, aggr: str, act: str, heads: int, hidden_units: int, dropout: float, concat: bool,
-              positive: bool):
+    def learn(self, config: dict, positive: bool):
         # Call the learn methods of each component individually with the corresponding feedback
-        self.attention.learn(att, positive)
-        self.aggregator.learn(aggr, positive)
-        self.activation.learn(act, positive)
-        self.concat.learn(concat, positive)
-        self.heads.learn(heads, positive)
-        self.hidden_units.learn(hidden_units, positive)
-        self.dropout.learn(dropout, positive)
+        self.attention.learn(config["attention"], positive)
+        self.aggregator.learn(config["aggregator"], positive)
+        self.activation.learn(config["activation"], positive)
+        self.concat.learn(config["concat"], positive)
+        self.heads.learn(config["heads"], positive)
+        if not self.is_output:
+            self.hidden_units.learn(config["out_channels"], positive)
+        self.dropout.learn(config["dropout"], positive)
 
-    def query(self, prev_out_shape: int, data_out_shape: int) -> GeoLayer:
+    def query(self, prev_out_shape: int, data_out_shape: int) -> dict:
         att_type = self.attention.query()
         agg_type = self.aggregator.query()
         heads = self.heads.query()
@@ -75,5 +72,35 @@ class LearnableBlock:
         hidden_units = self.hidden_units.query() if not self.is_output else data_out_shape
         activation = self.activation.query()
 
-        return GeoLayer(in_channels=prev_out_shape, out_channels=hidden_units, heads=heads, concat=concat,
-                        dropout=dropout, att_type=att_type, agg_type=agg_type, act_type=activation)
+        return {"in_channels": prev_out_shape, "out_channels": hidden_units, "heads": heads, "concat": concat,
+                "dropout": dropout, "attention": att_type, "aggregator": agg_type, "activation": activation}
+
+    def query_element(self, element: str):
+        match element:
+            case "attention":
+                return self.attention.query()
+            case "aggregator":
+                return self.aggregator.query()
+            case "activation":
+                return self.activation.query()
+            case "out_channels":
+                return self.hidden_units.query()
+            case "concat":
+                return self.concat.query()
+            case "dropout":
+                return self.dropout.query()
+            case "heads":
+                return self.heads.query()
+
+    def mutate_block(self, original_config: dict) -> dict:
+        mutated_block = copy.deepcopy(original_config)
+
+        candidates = list(mutated_block.keys())
+        candidates.remove("in_channels")
+        if self.is_output:
+            candidates.remove("out_channels")
+            candidates.remove("concat")
+
+        param_to_mutate = random.choice(candidates)
+        mutated_block[param_to_mutate] = self.query_element(param_to_mutate)
+        return mutated_block

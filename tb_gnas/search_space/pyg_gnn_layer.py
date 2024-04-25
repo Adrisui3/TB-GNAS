@@ -11,33 +11,11 @@ from .message_passing import MessagePassing
 
 # TODO: CREDIT AUTHORS
 
-def act_map(act):
-    if act == "linear":
-        return torch.nn.Identity()
-    elif act == "elu":
-        return torch.nn.ELU()
-    elif act == "sigmoid":
-        return torch.nn.Sigmoid()
-    elif act == "tanh":
-        return torch.nn.Tanh()
-    elif act == "relu":
-        return torch.nn.ReLU()
-    elif act == "relu6":
-        return torch.nn.ReLU6()
-    elif act == "softplus":
-        return torch.nn.Softplus()
-    elif act == "leaky_relu":
-        return torch.nn.LeakyReLU()
-    else:
-        raise Exception("wrong activate function")
-
-
 class GeoLayer(MessagePassing):
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 act_type,
                  heads=1,
                  concat=True,
                  negative_slope=0.2,
@@ -58,7 +36,6 @@ class GeoLayer(MessagePassing):
         self.dropout = dropout
         self.att_type = att_type
         self.agg_type = agg_type
-        self.act_type = act_type
 
         # GCN weight
         self.gcn_weight = None
@@ -203,9 +180,6 @@ class GeoLayer(MessagePassing):
         return '{}({}, {}, heads={})'.format(self.__class__.__name__,
                                              self.in_channels,
                                              self.out_channels, self.heads)
-
-    def get_activation(self):
-        return act_map(self.act_type)
 
     def get_block(self):
         return {"in_channels": self.in_channels, "attention": self.att_type, "aggregator": self.agg_type,

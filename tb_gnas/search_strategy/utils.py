@@ -27,8 +27,7 @@ def objective_function(acc: float, size: int) -> float:
 def unhandled_model(exception: Exception, logger: Logger, model: HyperModel):
     logger.warning("A model could not be handled: " + str(model.get_blocks()))
     logger.warning("Size: " + str(model.size()))
-    if "shapes cannot be multiplied" in str(exception):
+    if "CUDA out of memory" in str(exception):
         logger.error("Reason: " + str(exception))
-        raise
     else:
-        logger.warning("Reason: " + str(exception))
+        raise

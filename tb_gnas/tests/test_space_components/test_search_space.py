@@ -31,4 +31,6 @@ class TestSearchSpace:
         model = space.query_for_depth(depth=2)
         blocks = model.get_blocks()
 
+        print(list(model.children()))
+
         assert blocks[0]["in_channels"] == 20 and blocks[-1]["out_channels"] == 5
