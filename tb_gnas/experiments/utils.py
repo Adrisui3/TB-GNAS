@@ -3,15 +3,15 @@ from torch_geometric.datasets import Planetoid
 
 PARAMS_PER_DATASET = {"PubMed":
     {"fuzzy_local_search": {
-        "num_iters": 150,
+        "num_iters": 1500,
         "max_depth": 2,
     },
         "fuzzy_simulated_annealing": {
-            "num_iters": 150,
+            "num_iters": 1500,
             "max_depth": 2
         },
         "local_search": {
-            "num_iters": 150,
+            "num_iters": 1500,
             "max_depth": 2
 
         },
@@ -23,11 +23,11 @@ PARAMS_PER_DATASET = {"PubMed":
         }},
     "Cora":
         {"fuzzy_local_search": {
-            "num_iters": 150,
+            "num_iters": 1500,
             "max_depth": 2,
         },
             "fuzzy_simulated_annealing": {
-                "num_iters": 150,
+                "num_iters": 1500,
                 "max_depth": 2
             },
             "local_search": {
@@ -43,15 +43,15 @@ PARAMS_PER_DATASET = {"PubMed":
             }},
     "Citeseer":
         {"fuzzy_local_search": {
-            "num_iters": 150,
+            "num_iters": 1500,
             "max_depth": 2,
         },
             "fuzzy_simulated_annealing": {
-                "num_iters": 150,
+                "num_iters": 1500,
                 "max_depth": 2
             },
             "local_search": {
-                "num_iters": 150,
+                "num_iters": 1500,
                 "max_depth": 2
 
             },

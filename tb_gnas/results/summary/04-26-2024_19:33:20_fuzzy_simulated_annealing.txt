@@ -1,0 +1,36 @@
+---- DATASET: PubMed()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GeoLayer(500, 128, heads=2)
+    (1): Tanh()
+    (2): GeoLayer(128, 3, heads=4)
+    (3): Softplus(beta=1, threshold=20)
+  )
+), 0.798, 130203, 55.80342674255371, [(-1, 0.722, 20380), (0, 0.75, 20542), (22, 0.754, 8267), (32, 0.762, 16299), (33, 0.772, 16299), (42, 0.78, 130203), (50, 0.8, 130203)])
+Average acc:  0.698875 +/- 0.11994836128517972
+Average size:  88482.59375 +/- 103610.40766039728
+Average runtime:  155.20121826976538 +/- 98.75270208742697
+---- DATASET: Cora()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GeoLayer(1433, 64, heads=4)
+    (1): LeakyReLU(negative_slope=0.01)
+    (2): GeoLayer(64, 7, heads=6)
+    (3): Softplus(beta=1, threshold=20)
+  )
+), 0.795, 370210, 26.986299753189087, [(-1, 0.746, 371242), (1, 0.756, 371242), (3, 0.776, 368362), (24, 0.802, 370210)])
+Average acc:  0.72815625 +/- 0.05467638279858591
+Average size:  446326.96875 +/- 652006.0475778045
+Average runtime:  38.05216325074434 +/- 16.6468296937369
+---- DATASET: Citeseer()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GeoLayer(3703, 8, heads=8)
+    (1): ELU(alpha=1.0)
+    (2): GeoLayer(8, 6, heads=6)
+    (3): LeakyReLU(negative_slope=0.01)
+  )
+), 0.7, 237494, 34.130998373031616, [(-1, 0.342, 61204), (4, 0.58, 1901874), (12, 0.662, 239566), (40, 0.694, 1899406), (53, 0.698, 237494)])
+Average acc:  0.6004375 +/- 0.08614919380789351
+Average size:  984363.5625 +/- 1935049.9632020313
+Average runtime:  38.829235784709454 +/- 18.70726767365413

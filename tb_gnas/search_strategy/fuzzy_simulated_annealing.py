@@ -11,7 +11,13 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
     model_cache = {}
 
     logger.info("Generating and training initial model - STARTING")
-    best_model, best_val_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model())
+    best_model, best_val_acc = None, None
+    while best_model is None and best_val_acc is None:
+        try:
+            best_model, best_val_acc = evaluator.low_fidelity_estimation(model=search_space.get_init_model())
+        except torch.cuda.OutOfMemoryError:
+            logger.warning("Failed to generate initial model. Retrying...")
+
     best_size = best_model.size()
     incumbent_model, incumbent_acc, incumbent_size = best_model, best_val_acc, best_size
     model_cache[best_model.get_hashable_repr()] = best_val_acc
@@ -71,7 +77,6 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
             failed_models += 1
             if failed_models > num_iters:
                 raise
-
 
     logger.info("Evaluating model in test set...")
     best_model.reset_parameters()
