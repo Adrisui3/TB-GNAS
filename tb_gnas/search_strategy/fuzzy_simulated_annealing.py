@@ -3,7 +3,9 @@ import random
 import torch.cuda
 
 from tb_gnas.fuzzy_comparator.fuzzy_comparator import RuleConsequent
-from tb_gnas.search_strategy.utils import setup_search, unhandled_model
+from tb_gnas.search_strategy.utils import setup_search
+
+MAX_FAILED_MODELS = 150
 
 
 def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
@@ -28,7 +30,6 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
 
     history = [(-1, best_val_acc, best_size)]
     explored_models = 0
-    failed_models = 0
 
     while explored_models < num_iters:
         logger.info(" --- ITERATION: " + str(explored_models) + " ---")
@@ -43,10 +44,13 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
                 model_cache[current_repr] = current_acc
             else:
                 logger.info("Cached model, skipping evaluation...")
-                current_acc = model_cache[current_repr]
+                continue
 
             current_size = current_model.size()
-            logger.info("Validation accuracy: " + str(current_acc) + " - Size: " + str(current_size))
+            logger.info("Best model objective function: " + str(best_val_acc) + " - Size: " + str(best_size))
+            logger.info(
+                "Incumbent model objective function: " + str(incumbent_acc) + " - Size: " + str(incumbent_size))
+            logger.info("New model objective function: " + str(current_acc) + " - Size: " + str(current_size))
 
             rule_consequent_incumbent = comparator.compute_fired_rules(incumbent_size, incumbent_acc, current_size,
                                                                        current_acc)
@@ -72,11 +76,8 @@ def fuzzy_simulated_annealing(dataset, num_iters: int, max_depth: int = None):
                 del current_model
 
             explored_models += 1
-        except Exception as exception:
-            unhandled_model(exception, logger, current_model)
-            failed_models += 1
-            if failed_models > num_iters:
-                raise
+        except torch.cuda.OutOfMemoryError:
+            logger.warning("A model could not be fit in memory: " + str(current_model.get_blocks()))
 
     logger.info("Evaluating model in test set...")
     best_model.reset_parameters()

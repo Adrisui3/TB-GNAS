@@ -1,10 +1,9 @@
-import random
 import copy
+import random
 
 from .component_type import ComponentType
 from .hyperparameters.dimension_ratio import DimensionRatio
 from .learnable_space_component import LearnableSpaceComponent
-from .pyg_gnn_layer import GeoLayer
 
 
 def compute_out_channels(is_output: bool, data_out_shape: int, prev_out_channels: int, dim_ratio: DimensionRatio,
@@ -57,7 +56,7 @@ class LearnableBlock:
         self.attention.learn(config["attention"], positive)
         self.aggregator.learn(config["aggregator"], positive)
         self.activation.learn(config["activation"], positive)
-        self.concat.learn(config["concat"], positive)
+        # self.concat.learn(config["concat"], positive)
         self.heads.learn(config["heads"], positive)
         if not self.is_output:
             self.hidden_units.learn(config["out_channels"], positive)
@@ -75,32 +74,32 @@ class LearnableBlock:
         return {"in_channels": prev_out_shape, "out_channels": hidden_units, "heads": heads, "concat": concat,
                 "dropout": dropout, "attention": att_type, "aggregator": agg_type, "activation": activation}
 
-    def query_element(self, element: str):
+    def query_element(self, element: str, prev_value=None):
         match element:
             case "attention":
-                return self.attention.query()
+                return self.attention.query(prev_value)
             case "aggregator":
-                return self.aggregator.query()
+                return self.aggregator.query(prev_value)
             case "activation":
-                return self.activation.query()
+                return self.activation.query(prev_value)
             case "out_channels":
-                return self.hidden_units.query()
+                return self.hidden_units.query(prev_value)
             case "concat":
-                return self.concat.query()
+                return self.concat.query(prev_value)
             case "dropout":
-                return self.dropout.query()
+                return self.dropout.query(prev_value)
             case "heads":
-                return self.heads.query()
+                return self.heads.query(prev_value)
 
     def mutate_block(self, original_config: dict) -> dict:
         mutated_block = copy.deepcopy(original_config)
 
         candidates = list(mutated_block.keys())
         candidates.remove("in_channels")
+        candidates.remove("concat")
         if self.is_output:
             candidates.remove("out_channels")
-            candidates.remove("concat")
 
         param_to_mutate = random.choice(candidates)
-        mutated_block[param_to_mutate] = self.query_element(param_to_mutate)
+        mutated_block[param_to_mutate] = self.query_element(param_to_mutate, mutated_block[param_to_mutate])
         return mutated_block

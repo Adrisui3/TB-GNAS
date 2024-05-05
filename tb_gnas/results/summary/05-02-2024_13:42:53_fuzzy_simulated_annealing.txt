@@ -1,0 +1,39 @@
+---- DATASET: PubMed()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GeoLayer(500, 64, heads=4)
+    (1): Tanh()
+    (2): GeoLayer(256, 3, heads=6)
+    (3): Sigmoid()
+  )
+), 0.792, 133415, 4202.963272571564, [(-1, 0.712, 533799), (0, 0.738, 533543), (2, 0.75, 534442), (3, 0.768, 534442), (17, 0.772, 65950), (19, 0.78, 527387), (42, 0.774, 134314), (43, 0.774, 34282), (82, 0.784, 132766), (192, 0.778, 34282), (238, 0.792, 133415), (372, 0.798, 33383), (686, 0.794, 32591), (1454, 0.808, 133415)])
+Best config:  [{'in_channels': 500, 'out_channels': 64, 'heads': 1, 'concat': True, 'dropout': 0.1, 'attention': 'const', 'aggregator': 'sum', 'activation': 'relu6'}, {'in_channels': 64, 'out_channels': 3, 'heads': 6, 'concat': False, 'dropout': 0.3, 'attention': 'cos', 'aggregator': 'sum', 'activation': 'sigmoid'}]
+Average acc:  0.75296875 +/- 0.10387446882385248
+Average size:  87428.84375 +/- 123654.10671332083
+Average runtime:  3487.565758086741 +/- 778.5337261525733
+---- DATASET: Cora()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GeoLayer(1433, 32, heads=1)
+    (1): ELU(alpha=1.0)
+    (2): GeoLayer(32, 7, heads=2)
+    (3): Sigmoid()
+  )
+), 0.804, 46435, 1015.9063694477081, [(-1, 0.71, 218659), (1, 0.724, 404259), (12, 0.726, 193987), (13, 0.742, 193987), (16, 0.762, 195807), (62, 0.772, 185635), (268, 0.77, 46197), (452, 0.78, 187455), (807, 0.774, 99303), (872, 0.776, 46435), (1299, 0.784, 198375), (1312, 0.778, 99335), (1313, 0.78, 92405), (1360, 0.782, 46435)])
+Best config:  [{'in_channels': 1433, 'out_channels': 512, 'heads': 1, 'concat': True, 'dropout': 0.5, 'attention': 'cos', 'aggregator': 'sum', 'activation': 'tanh'}, {'in_channels': 512, 'out_channels': 7, 'heads': 2, 'concat': False, 'dropout': 0.1, 'attention': 'generalized_linear', 'aggregator': 'max', 'activation': 'relu6'}]
+Average acc:  0.77465625 +/- 0.02034485404070279
+Average size:  147883.84375 +/- 155297.44141044898
+Average runtime:  1034.4337010458112 +/- 351.04363063633144
+---- DATASET: Citeseer()----
+Best found model:  (HyperModel(
+  (layers): ModuleList(
+    (0): GeoLayer(3703, 16, heads=16)
+    (1): Softplus(beta=1, threshold=20)
+    (2): GeoLayer(256, 6, heads=6)
+    (3): Sigmoid()
+  )
+), 0.709, 958046, 1433.772842168808, [(-1, 0.212, 486540), (0, 0.35, 486540), (1, 0.452, 486540), (10, 0.514, 365220), (11, 0.586, 365220), (35, 0.626, 2906958), (39, 0.658, 3864910), (41, 0.66, 479054), (47, 0.688, 479054), (54, 0.688, 359310), (65, 0.7, 365190), (628, 0.694, 360502), (885, 0.694, 59740), (1396, 0.724, 958046)])
+Best config:  [{'in_channels': 3703, 'out_channels': 16, 'heads': 6, 'concat': True, 'dropout': 0.5, 'attention': 'generalized_linear', 'aggregator': 'mean', 'activation': 'tanh'}, {'in_channels': 96, 'out_channels': 6, 'heads': 6, 'concat': False, 'dropout': 0.3, 'attention': 'linear', 'aggregator': 'max', 'activation': 'linear'}]
+Average acc:  0.67090625 +/- 0.02136931119473671
+Average size:  1424739.0625 +/- 2777487.42547419
+Average runtime:  1237.7195724248886 +/- 515.3420131066083

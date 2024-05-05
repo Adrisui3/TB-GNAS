@@ -20,7 +20,10 @@ class LearnableSpaceComponent:
         feedback = 1 if positive else -1
         self.scores[component] = max(self.scores[component] + feedback, 1)
 
-    def query(self):
+    def query(self, prev_value=None):
         options = list(self.components)
+        if prev_value is not None:
+            options.remove(prev_value)
+
         weights = [self.scores[component] for component in options]
         return random.choices(population=options, weights=weights, k=1)[0]
